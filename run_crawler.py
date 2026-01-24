@@ -29,10 +29,9 @@ KEYWORDS = ["dynamic programming", "dp", "动态规划", "memoization", "tabulat
 # 种子 URL 列表（添加更多起点以体现 Deep Research）
 SEED_URLS = [
     "https://en.wikipedia.org/wiki/Dynamic_programming",
-    "https://leetcode.com/tag/dynamic-programming/",
     "https://www.geeksforgeeks.org/dynamic-programming/",
-    "https://leetcode.com/problems/two-sum/",
-    "https://leetcode.com/problems/climbing-stairs/",
+    "https://cp-algorithms.com/dynamic_programming/intro-to-dp.html",
+    "https://oi-wiki.org/dp/",
 ]
 
 # 预算参数
