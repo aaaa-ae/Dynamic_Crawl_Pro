@@ -5,7 +5,7 @@ Dynamic_Crawl_Pro/
 ├── src/                              # 源代码目录
 │   ├── __init__.py                   # 包初始化文件
 │   ├── config.py                     # 配置模块（核心、LLM、Agent配置）
-│   ├── main.py                       # 主入口文件
+│   ├── main.py                       # 主入口文件（支持命令行参数）
 │   ├── agents/                       # Agent 实现目录
 │   │   ├── __init__.py
 │   │   ├── base.py                   # 基础 Agent 抽象类
@@ -17,9 +17,9 @@ Dynamic_Crawl_Pro/
 │   │   └── coordinator.py            # TaskCoordinator - 任务协调器
 │   └── utils/                        # 工具函数目录
 │       ├── __init__.py
-│       ├── url_utils.py              # URL 工具（解析、规范化、过滤）
-│       ├── text_utils.py             # 文本工具（关键词匹配、哈希计算）
-│       └── data_manager.py           # 数据管理器（共享存储、输出写入）
+│       ├── url_utils.py              # URL 工具
+│       ├── text_utils.py             # 文本工具
+│       └── data_manager.py           # 数据管理器
 │
 ├── tests/                            # 测试目录
 │   ├── __init__.py
@@ -27,54 +27,49 @@ Dynamic_Crawl_Pro/
 │
 ├── examples/                         # 示例目录
 │   ├── __init__.py
-│   └── example_configs.py           # 不同知识点的配置示例
+│   └── example_configs.py           # 配置示例
 │
-├── output/                           # 输出目录（自动创建）
-│   └── *.jsonl                       # 输出的 JSONL 文件
-│
-├── logs/                             # 日志目录（自动创建）
-│   └── *.log                         # 日志文件
-│
-├── .cache/                           # 缓存目录（自动创建）
-│   ├── pages/                        # 爬取的页面缓存
-│   └── extracted/                    # 提取的数据缓存
-│
+├── run_crawler.py                    # 启动文件（Pycharm/本地运行推荐）
+├── deep_research_demo.py             # 深度研究演示脚本
+├── .env                              # 环境变量配置
 ├── requirements.txt                  # Python 依赖
 ├── README.md                         # 项目说明文档
-├── .env.example                      # 环境变量示例
-├── .gitignore                        # Git 忽略文件
-├── run.bat                           # Windows 运行脚本
-└── run.sh                            # Unix 运行脚本
+├── PROJECT_STRUCTURE.md              # 本文档
+│
+├── output/                           # 输出目录（运行时自动创建）
+├── logs/                             # 日志目录（运行时自动创建）
+└── .cache/                           # 缓存目录（运行时自动创建）
 ```
 
 ## 核心模块说明
 
-### 1. 配置模块 (`config.py`)
+### 1. 配置模块 (`src/config.py`)
 
-定义三个配置类：
-- `CrawlConfig`: 爬虫配置（topic, keywords, max_depth, max_pages 等）
-- `LLMConfig`: LLM 配置（api_key, model, base_url 等）
-- `AgentConfig`: Agent 配置（提取参数、质量判断阈值等）
+定义三个核心配置类：
+- `CrawlConfig`: 爬虫基础配置（topic, keywords, max_depth, max_pages 等）
+- `LLMConfig`: LLM 相关配置（enabled, api_key, model, base_url 等）
+- `AgentConfig`: 各个 Agent 的具体参数（提取长度、质量评分阈值等）
 
-### 2. Agent 模块 (`agents/`)
+### 2. Agent 模块 (`src/agents/`)
 
-- **BaseAgent**: 所有 Agent 的基类，定义通用接口
-- **CrawlerAgent**: 使用 `AsyncWebCrawler` 异步爬取页面
-- **ExtractorAgent**: 从 HTML/Markdown 中提取正文和链接
-- **QualityGateAgent**: 基于 LLM 和规则进行质量判断
+- **BaseAgent**: 抽象基类，提供统一的任务处理接口和指标统计功能。
+- **CrawlerAgent**: 基于 `crawl4ai` 的 `AsyncWebCrawler` 实现，支持并发爬取和重试。
+- **ExtractorAgent**: 负责从原始页面（HTML/Markdown）提取标题、正文、链接和关键词命中统计。
+- **QualityGateAgent**: 系统核心，结合简单规则（Fast Filter）和 LLM 评估页面的相关性和质量。
 
-### 3. 工具模块 (`utils/`)
+### 3. 工具模块 (`src/utils/`)
 
-- **url_utils.py**: URL 解析、规范化、过滤
-- **text_utils.py**: 文本处理、关键词匹配、哈希计算
-- **data_manager.py**: 数据共享、缓存、输出写入
+- **url_utils.py**: 处理 URL 规范化、域名提取及过滤。
+- **text_utils.py**: 提供文本清洗、关键词统计及内容哈希计算。
+- **data_manager.py**: 实现数据共享层，提供内存和磁盘缓存，管理 `PageRecord` 输出。
 
-### 4. 任务协调器 (`pipeline/coordinator.py`)
+### 4. 任务协调器 (`src/pipeline/coordinator.py`)
 
-协调三个 Agent 的任务流转：
-- 管理任务队列（asyncio.Queue）
-- 控制并发和资源限制
-- 收集统计信息
+核心调度逻辑：
+- 管理异步任务队列。
+- 协调 Agent 间的数据流转。
+- 控制整体预算（最大页面数、域名限额、并发数等）。
+- 实时统计爬取指标。
 
 ## 数据流
 
@@ -121,15 +116,11 @@ python -m src.main --topic "machine learning" --max-pages 50
 ### 3. 运行
 
 ```bash
-# Windows
-run.bat
+# 推荐用法：直接运行启动脚本
+python run_crawler.py
 
-# Unix/Linux/Mac
-chmod +x run.sh
-./run.sh
-
-# 或者直接运行
-python -m src.main
+# 命令行模式（支持动态参数覆盖）
+python -m src.main --topic "machine learning" --max-pages 50
 ```
 
 ### 4. 查看输出

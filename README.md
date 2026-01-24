@@ -18,26 +18,28 @@
 Dynamic_Crawl_Pro/
 ├── src/
 │   ├── __init__.py
-│   ├── config.py              # 配置文件
-│   ├── main.py                # 入口文件
-│   ├── agents/                # Agent 实现
+│   ├── config.py              # 集中式配置
+│   ├── main.py                # 支持命令行参数的入口
+│   ├── agents/                # 核心智能体实现
 │   │   ├── __init__.py
-│   │   ├── base.py           # 基础 Agent 类
-│   │   ├── crawler.py        # CrawlerAgent - 爬虫 Agent
-│   │   ├── extractor.py      # ExtractorAgent - 内容提取 Agent
-│   │   └── quality_gate.py   # QualityGateAgent - 质量判断 Agent
-│   ├── pipeline/              # 任务协调
+│   │   ├── base.py           # 基础抽象类
+│   │   ├── crawler.py        # 爬虫 Agent (AsyncWebCrawler)
+│   │   ├── extractor.py      # 提取 Agent (内容 & 链接)
+│   │   └── quality_gate.py   # 质量门控 Agent (LLM 评估)
+│   ├── pipeline/              # 任务流控
 │   │   ├── __init__.py
-│   │   └── coordinator.py    # 协调器
-│   └── utils/                 # 工具函数
+│   │   └── coordinator.py    # 任务协调器 (队列管理)
+│   └── utils/                 # 工具集
 │       ├── __init__.py
-│       ├── data_manager.py   # 数据管理器
-│       ├── url_utils.py      # URL 工具
-│       └── text_utils.py     # 文本工具
+│       ├── data_manager.py   # 数据共享 & 缓存
+│       ├── url_utils.py      # URL 处理
+│       └── text_utils.py     # 文本处理
+├── run_crawler.py             # 便捷启动脚本
+├── deep_research_demo.py      # 深度研究演示
 ├── tests/
-│   └── test_smoke.py         # 烟雾测试
-├── requirements.txt          # 依赖
-└── README.md                 # 本文档
+│   └── test_smoke.py         # 基础连通性测试
+├── requirements.txt
+└── README.md
 ```
 
 ## 安装
@@ -51,89 +53,48 @@ pip install -r requirements.txt
 
 ## 配置
 
-### 基本配置
+系统提供两种配置方式：
 
-编辑 `src/main.py` 中的配置部分：
+### 1. 修改 `run_crawler.py` (推荐)
+适用于 PyCharm 或本地快速开发。在 `run_crawler.py` 顶部的配置区域直接修改：
 
 ```python
-# 核心配置
-TOPIC = "dynamic programming"                    # 目标知识点
-KEYWORDS = ["dynamic programming", "dp", "动态规划", "memoization", "tabulation"]
-SEED_URLS = [
-    "https://en.wikipedia.org/wiki/Dynamic_programming",
-    "https://leetcode.com/tag/dynamic-programming/",
-]
-
-# 预算参数
-MAX_DEPTH = 3                                    # 最大爬取深度
-MAX_PAGES = 100                                  # 最大页面数
-MAX_PAGES_PER_DOMAIN = 20                        # 每个域名最大页面数
-CONCURRENCY = 5                                  # 并发爬取数
-
-# 域名控制
-ALLOWED_DOMAINS = ["wikipedia.org", "leetcode.com", "geeksforgeeks.org"]
-BLOCKED_DOMAINS = ["youtube.com", "twitter.com", "facebook.com"]
-
-# LLM 配置（用于 QualityGateAgent）
-LLM_API_KEY = "your-api-key"                    # OpenAI API Key
-LLM_MODEL = "gpt-3.5-turbo"                      # 或 gpt-4
-LLM_BASE_URL = "https://api.openai.com/v1"       # 可选：自定义 API 地址
-
-# 输出配置
-OUTPUT_FILE = "output/dp_crawl_results.jsonl"    # 输出文件路径
+TOPIC = "dynamic programming"
+ENABLE_LLM = True
+# ... 其他配置
 ```
 
-### LLM 配置选项
+### 2. 通过 `.env` 文件
+将敏感信息（如 API Key）放入 `.env` 文件中：
 
-系统支持多种 LLM 提供商：
+```env
+OPENAI_API_KEY=sk-...
+OPENAI_BASE_URL=https://api.openai.com/v1
+OPENAI_MODEL=gpt-4
+```
 
-1. **OpenAI**（默认）
-   ```python
-   LLM_API_KEY = "sk-..."
-   LLM_MODEL = "gpt-4"
-   LLM_BASE_URL = "https://api.openai.com/v1"
-   ```
+### 3. 命令行参数
+`src/main.py` 支持丰富的命令行参数：
 
-2. **Azure OpenAI**
-   ```python
-   LLM_API_KEY = "your-azure-key"
-   LLM_MODEL = "gpt-4"
-   LLM_BASE_URL = "https://your-resource.openai.azure.com/"
-   ```
-
-3. **其他兼容 OpenAI API 的服务**（如 DeepSeek、Moonshot 等）
-   ```python
-   LLM_API_KEY = "your-key"
-   LLM_MODEL = "deepseek-chat"
-   LLM_BASE_URL = "https://api.deepseek.com/v1"
-   ```
+```bash
+python -m src.main --topic "binary search" --max-pages 50 --enable-llm
+```
 
 ## 运行
 
-### 基本用法
-
+### 方法 A：使用启动脚本 (推荐)
 ```bash
-# 从项目根目录运行
-python -m src.main
+python run_crawler.py
 ```
 
-### 自定义配置运行
-
-修改 `src/main.py` 中的配置参数，然后运行：
-
+### 方法 B：命令行模块模式
 ```bash
-python -m src.main --topic "binary search"
+python -m src.main --topic "machine learning"
 ```
 
-### 命令行参数（可选）
-
+### 方法 C：深度研究演示
 ```bash
-python -m src.main \
-  --topic "binary search" \
-  --seed-url "https://en.wikipedia.org/wiki/Binary_search_algorithm" \
-  --max-depth 3 \
-  --max-pages 50 \
-  --concurrency 5
+python deep_research_demo.py
 ```
 
 ## 输出格式
@@ -197,13 +158,13 @@ python -m src.main \
 
 ### 3. QualityGateAgent（质量判断 Agent）
 
-- **职责**：基于 LLM 的质量判断
+- **职责**：基于 LLM 和规则的质量评估
 - **功能**：
-  - 基于规则的预过滤（fast_filter）
-  - LLM 深度评估
-  - 决策：keep/discard、expand/don't-expand、priority
-- **输入**：title、正文片段、headings、关键词匹配数、出链样例
-- **输出**：决策和理由
+  - **Fast Filter**：在调用 LLM 前进行关键词命中和文本长度预判（低成本）
+  - **LLM Deep Evaluation**：根据页面摘要、标题、出链样例等进行深度语义评估
+  - **动态决策**：决定页面是否 `keep` (保存) 以及是否 `expand` (进一步爬取出链)
+- **输入**：ExtractorAgent 的结构化输出
+- **输出**：评估决策 (Keep/Discard, Expand/Don't-Expand, Priority)
 
 ## 任务协调流程
 
