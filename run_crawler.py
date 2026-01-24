@@ -28,10 +28,17 @@ KEYWORDS = ["dynamic programming", "dp", "动态规划", "memoization", "tabulat
 
 # 种子 URL 列表（添加更多起点以体现 Deep Research）
 SEED_URLS = [
+    # 概念总览
     "https://en.wikipedia.org/wiki/Dynamic_programming",
-    "https://www.geeksforgeeks.org/dynamic-programming/",
     "https://cp-algorithms.com/dynamic_programming/intro-to-dp.html",
-    "https://oi-wiki.org/dp/",
+
+    # 经典 DP 专题（可扩展：背包/LIS/优化）
+    "https://cp-algorithms.com/dynamic_programming/knapsack.html",
+    "https://cp-algorithms.com/dynamic_programming/longest_increasing_subsequence.html",
+    "https://cp-algorithms.com/dynamic_programming/divide-and-conquer-dp.html",
+
+    # 题单/目录型入口（链接多，非常适合扩展）
+    "https://www.geeksforgeeks.org/dynamic-programming/",
 ]
 
 # 预算参数
