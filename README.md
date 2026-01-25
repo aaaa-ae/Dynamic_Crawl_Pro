@@ -54,7 +54,7 @@ pip install -r requirements.txt
 
 ## 配置
 
-系统提供两种配置方式：
+系统提供三种配置方式：
 
 ### 1. 修改 `run_crawler.py` (推荐)
 适用于 PyCharm 或本地快速开发。在 `run_crawler.py` 顶部的配置区域直接修改：
