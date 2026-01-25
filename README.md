@@ -35,7 +35,6 @@ Dynamic_Crawl_Pro/
 │       ├── url_utils.py      # URL 处理
 │       └── text_utils.py     # 文本处理
 ├── run_crawler.py             # 便捷启动脚本
-├── deep_research_demo.py      # 深度研究演示
 ├── tests/
 │   └── test_smoke.py         # 基础连通性测试
 ├── requirements.txt
@@ -90,11 +89,6 @@ python run_crawler.py
 ### 方法 B：命令行模块模式
 ```bash
 python -m src.main --topic "machine learning"
-```
-
-### 方法 C：深度研究演示
-```bash
-python deep_research_demo.py
 ```
 
 ## 输出格式
@@ -258,10 +252,6 @@ python tests/test_smoke.py
 ```python
 ENABLE_LLM = False  # 仅使用 fast_filter 进行判断
 ```
-
-## 许可证
-
-MIT License
 
 ## 贡献
 

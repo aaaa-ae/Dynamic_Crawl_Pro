@@ -30,7 +30,6 @@ Dynamic_Crawl_Pro/
 │   └── example_configs.py           # 配置示例
 │
 ├── run_crawler.py                    # 启动文件（Pycharm/本地运行推荐）
-├── deep_research_demo.py             # 深度研究演示脚本
 ├── .env                              # 环境变量配置
 ├── requirements.txt                  # Python 依赖
 ├── README.md                         # 项目说明文档
