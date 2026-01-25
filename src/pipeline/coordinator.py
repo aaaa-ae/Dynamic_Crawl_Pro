@@ -1,14 +1,21 @@
 """
 任务协调器
 负责协调多个 Agent 之间的任务流转
+支持对话式协调机制
 """
 
 import asyncio
+import json
 from typing import Dict, Any, List, Set, Optional, Tuple
 from dataclasses import dataclass, field
 from datetime import datetime
 from collections import defaultdict
 from loguru import logger
+
+# CAMEL imports for conversation coordinator
+from camel.agents import ChatAgent
+from camel.types import ModelType, ModelPlatformType
+from camel.models import ModelFactory
 
 from ..agents import (
     CrawlerAgent,
@@ -40,6 +47,7 @@ class TaskCoordinator:
     """
     任务协调器
     协调 CrawlerAgent、ExtractorAgent 和 QualityGateAgent 之间的任务流转
+    支持对话式协调机制
     """
 
     def __init__(
@@ -108,6 +116,11 @@ class TaskCoordinator:
             },
         )
 
+        # 对话式协调器
+        self.conversation_coordinator: ChatAgent = None
+        if llm_config.enable_conversation_coordinator and llm_config.api_key:
+            self._init_conversation_coordinator()
+
         # 任务队列
         self.task_queue: asyncio.Queue = asyncio.Queue()
         self.visited_urls: Set[str] = set()
@@ -128,6 +141,195 @@ class TaskCoordinator:
         self._running = False
 
         logger.info("[Coordinator] Initialized with all agents")
+
+    def _map_model_name(self, model_name: str) -> ModelType:
+        """
+        将模型名称映射到 CAMEL 的 ModelType 枚举
+
+        Args:
+            model_name: 模型名称字符串
+
+        Returns:
+            CAMEL ModelType 枚举值
+        """
+        model_mapping = {
+            "gpt-4": ModelType.GPT_4,
+            "gpt-4-turbo": ModelType.GPT_4_TURBO,
+            "gpt-4-turbo-preview": ModelType.GPT_4_TURBO,
+            "gpt-4o": ModelType.GPT_4O,
+            "gpt-4o-mini": ModelType.GPT_4O_MINI,
+            "gpt-3.5-turbo": ModelType.GPT_3_5_TURBO,
+            "gpt-35-turbo": ModelType.GPT_3_5_TURBO,
+        }
+
+        # 移除可能的前缀
+        clean_name = model_name.lower()
+        if clean_name.startswith("openai/"):
+            clean_name = clean_name[7:]
+
+        return model_mapping.get(clean_name, ModelType.GPT_3_5_TURBO)
+
+    def _init_conversation_coordinator(self):
+        """初始化对话式协调器"""
+        try:
+            # 系统消息使用字符串格式
+            system_message = """你是爬虫系统的任务协调器，负责综合多个 Agent 的结果，做出最终决策。
+
+你的职责：
+1. 协调 CrawlerAgent（爬取）、ExtractorAgent（提取）、QualityGateAgent（质量判断）的结果
+2. 提供平衡的决策建议，而不是简单地覆盖原决策
+3. 考虑整体爬取策略，避免重复和低效
+
+决策原则：
+- 优先尊重 QualityGateAgent 的专业判断
+- 只有在有明显冲突时才进行调整
+- 保持决策的一致性和可解释性
+
+请严格按照 JSON 格式返回协调结果。"""
+
+            # 获取配置
+            model_name = self.llm_config.coordinator_model if self.llm_config.coordinator_model else "gpt-3.5-turbo"
+            base_url = self.llm_config.base_url
+            api_key = self.llm_config.api_key
+
+            # 如果使用自定义 base_url，使用 OPENAI_COMPATIBLE_MODEL
+            is_custom_base_url = "openai.com" not in base_url
+
+            # 创建模型实例 (使用 url 参数而不是 base_url)
+            model = ModelFactory.create(
+                model_platform=ModelPlatformType.OPENAI_COMPATIBLE_MODEL if is_custom_base_url else ModelPlatformType.OPENAI,
+                model_type=self._map_model_name(model_name),
+                api_key=api_key,
+                url=base_url,
+            )
+
+            # 创建 ChatAgent
+            self.conversation_coordinator = ChatAgent(
+                system_message=system_message,
+                model=model,
+            )
+
+            logger.info(f"[Coordinator] Conversation coordinator initialized: "
+                       f"{model_name} @ {base_url}")
+        except Exception as e:
+            logger.warning(f"[Coordinator] Failed to initialize conversation coordinator: {e}")
+            self.conversation_coordinator = None
+
+    async def _conversation_based_decision(
+        self,
+        crawl_result: Dict[str, Any],
+        extracted_data: Dict[str, Any],
+        quality_result: Dict[str, Any],
+    ) -> Optional[Dict[str, Any]]:
+        """
+        使用对话式协调器进行决策协调
+
+        Args:
+            crawl_result: CrawlerAgent 的结果
+            extracted_data: ExtractorAgent 的结果
+            quality_result: QualityGateAgent 的结果
+
+        Returns:
+            协调后的决策结果
+        """
+        if not self.conversation_coordinator:
+            return None
+
+        # 汇总信息
+        url = extracted_data.get("url", "")
+        title = extracted_data.get("title", "")
+        keyword_hits = extracted_data.get("keyword_hits", 0)
+        links_count = extracted_data.get("extracted_links_count", 0)
+        headings = extracted_data.get("headings", [])[:5]
+
+        quality_decision = quality_result.get("decision", "discard")
+        quality_expand = quality_result.get("expand", False)
+        quality_priority = quality_result.get("priority", "medium")
+        quality_score = quality_result.get("relevance_score", 0.0)
+        quality_reasons = quality_result.get("reasons", "")
+        quality_method = quality_result.get("method", "unknown")
+
+        # 构建协调提示词
+        headings_str = ", ".join(headings) if headings else "N/A"
+
+        prompt = f"""请综合以下信息，给出协调后的决策：
+
+页面信息：
+- URL: {url}
+- 标题: {title}
+- 关键词命中数: {keyword_hits}
+- 提取链接数: {links_count}
+- 标题列表: {headings_str}
+
+QualityGateAgent 评估结果：
+- 决策: {quality_decision}
+- 是否扩展链接: {quality_expand}
+- 优先级: {quality_priority}
+- 相关性评分: {quality_score:.2f}
+- 评估方法: {quality_method}
+- 理由: {quality_reasons}
+
+请严格按照以下 JSON 格式返回协调结果（不要添加任何其他文本）:
+{{
+    "final_decision": "keep" | "discard",
+    "final_expand": true | false,
+    "final_priority": "high" | "medium" | "low",
+    "final_reasons": "简短说明协调理由",
+    "should_override": true | false,
+    "coordination_notes": "协调说明"
+}}
+
+字段说明：
+- final_decision: 最终决策（keep=保留，discard=丢弃）
+- final_expand: 是否继续爬取链接
+- final_priority: 页面优先级
+- final_reasons: 最终决策理由
+- should_override: 是否覆盖原决策（true=有调整，false=维持原决策）
+- coordination_notes: 协调过程的说明
+
+注意：默认情况下应该尊重 QualityGateAgent 的专业判断，只在有明显问题时才进行调整。"""
+
+        try:
+            # 使用 asyncio.to_thread 包装同步调用
+            response = await asyncio.to_thread(
+                self.conversation_coordinator.step,
+                prompt  # 直接传递字符串作为用户消息
+            )
+
+            # 提取响应内容
+            content = response.msgs[0].content if response.msgs else ""
+
+            # 尝试解析 JSON
+            try:
+                # 提取 JSON 部分（处理可能的额外文本）
+                json_start = content.find('{')
+                json_end = content.rfind('}') + 1
+                if json_start >= 0 and json_end > json_start:
+                    json_content = content[json_start:json_end]
+                    result = json.loads(json_content)
+
+                    logger.info(f"[Coordinator] Conversation coordination for {url}: "
+                               f"override={result.get('should_override')}, "
+                               f"notes={result.get('coordination_notes', '')}")
+
+                    return {
+                        "decision": result.get("final_decision", quality_decision),
+                        "expand": result.get("final_expand", quality_expand),
+                        "priority": result.get("final_priority", quality_priority),
+                        "reasons": result.get("final_reasons", quality_reasons),
+                        "should_override": result.get("should_override", False),
+                        "coordination_notes": result.get("coordination_notes", ""),
+                    }
+                else:
+                    return json.loads(content)
+            except json.JSONDecodeError:
+                logger.warning(f"[Coordinator] Failed to parse coordination response: {content}")
+                return None
+
+        except Exception as e:
+            logger.error(f"[Coordinator] Conversation coordination error: {e}")
+            # 返回 None，表示协调失败，将使用原始决策
+            return None
 
     def should_crawl(self, url: str, depth: int) -> bool:
         """
@@ -195,6 +397,8 @@ class TaskCoordinator:
         Returns:
             PageRecord（如果决定保存）
         """
+        import json  # Import here for coordination
+
         url = task.url
         depth = task.depth
 
@@ -248,7 +452,29 @@ class TaskCoordinator:
                 "method": "error",
             }
 
-        # 步骤4: 根据决策处理
+        # 步骤4: 对话式协调（如果启用）
+        if self.conversation_coordinator:
+            coordination_result = await self._conversation_based_decision(
+                crawl_result, extracted_data, quality_result
+            )
+
+            if coordination_result:
+                # 如果协调成功且需要覆盖
+                if coordination_result.get("should_override", False):
+                    logger.info(f"[Coordinator] Applying coordinated decision for {url}")
+                    quality_result.update({
+                        "decision": coordination_result["decision"],
+                        "expand": coordination_result["expand"],
+                        "priority": coordination_result["priority"],
+                        "reasons": coordination_result["reasons"],
+                        "method": "coordinated",
+                    })
+                else:
+                    # 记录协调建议但保持原决策
+                    logger.debug(f"[Coordinator] Coordination suggested keeping original decision for {url}")
+                    quality_result["coordination_notes"] = coordination_result.get("coordination_notes", "")
+
+        # 步骤5: 根据决策处理
         decision = quality_result.get("decision", "discard")
         expand = quality_result.get("expand", False)
         priority = quality_result.get("priority", "medium")
@@ -277,7 +503,7 @@ class TaskCoordinator:
             self.stats["discarded_pages"] += 1
             record = None
 
-        # 步骤5: 如果需要扩展，添加新任务
+        # 步骤6: 如果需要扩展，添加新任务
         if expand:
             new_urls = self.extractor_agent.extract_link_urls(extracted_data)
             new_tasks_added = 0

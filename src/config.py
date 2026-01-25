@@ -57,6 +57,10 @@ class LLMConfig:
     # 质量判断阈值
     min_relevance_score: float = 0.5
 
+    # 对话式协调配置
+    enable_conversation_coordinator: bool = False
+    coordinator_model: str = "gpt-3.5-turbo"
+
 
 @dataclass
 class AgentConfig:

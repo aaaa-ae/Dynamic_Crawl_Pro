@@ -5,12 +5,13 @@
 ## 功能特性
 
 - **异步并发爬取**：基于 crawl4ai 的 AsyncWebCrawler 实现高效爬取
-- **多智能体协作**：使用 CAMEL 框架协调多个 Agent 协同工作
-- **智能质量判断**：基于 LLM 的页面质量评估和决策
+- **多智能体协作**：四个专业 Agent 协同工作（爬取、提取、判断、协调）
+- **CAMEL 框架集成**：使用 CAMEL 框架实现智能质量评估
 - **成本优化**：基于规则的预过滤，减少不必要的 LLM 调用
 - **深度爬取控制**：支持最大深度、页面数、域名限制等配置
 - **去重机制**：基于内容哈希的去重
 - **结构化输出**：JSONL 格式输出，便于后续处理
+- **对话式协调（可选）**：多 Agent 结果综合决策机制
 
 ## 项目结构
 
@@ -25,16 +26,17 @@ Dynamic_Crawl_Pro/
 │   │   ├── base.py           # 基础抽象类
 │   │   ├── crawler.py        # 爬虫 Agent (AsyncWebCrawler)
 │   │   ├── extractor.py      # 提取 Agent (内容 & 链接)
-│   │   └── quality_gate.py   # 质量门控 Agent (LLM 评估)
+│   │   └── quality_gate.py   # 质量门控 Agent (CAMEL LLM)
 │   ├── pipeline/              # 任务流控
 │   │   ├── __init__.py
-│   │   └── coordinator.py    # 任务协调器 (队列管理)
+│   │   └── coordinator.py    # 任务协调器 (队列管理 + 可选对话式协调)
 │   └── utils/                 # 工具集
 │       ├── __init__.py
 │       ├── data_manager.py   # 数据共享 & 缓存
 │       ├── url_utils.py      # URL 处理
 │       └── text_utils.py     # 文本处理
 ├── run_crawler.py             # 便捷启动脚本
+├── .env                     # 环境变量配置
 ├── tests/
 │   └── test_smoke.py         # 基础连通性测试
 ├── requirements.txt
@@ -67,9 +69,16 @@ ENABLE_LLM = True
 将敏感信息（如 API Key）放入 `.env` 文件中：
 
 ```env
+# LLM 配置
 OPENAI_API_KEY=sk-...
-OPENAI_BASE_URL=https://api.openai.com/v1
-OPENAI_MODEL=gpt-4
+OPENAI_MODEL=gpt-4o-mini
+OPENAI_BASE_URL=https://api.openai-proxy.org/v1
+
+# 爬虫配置（可选，会覆盖代码中的配置）
+MAX_DEPTH=3
+MAX_PAGES=100
+CONCURRENCY=5
+OUTPUT_FILE=output/crawl_results.jsonl
 ```
 
 ### 3. 命令行参数
@@ -103,12 +112,12 @@ python -m src.main --topic "machine learning"
   "title": "Page Title",
   "keyword_hits": 3,
   "content_hash": "a1b2c3d4e5f6...",
-  "text_snippet": "This is the first 300 characters of the main content...",
+  "text_snippet": "This is first 300 characters of main content...",
   "extracted_links_count": 15,
   "headings": ["H1", "H2", ...],
   "decision": "keep",
   "priority": "high",
-  "reasons": "Contains detailed explanation of the concept with code examples"
+  "reasons": "Contains detailed explanation of concept with code examples"
 }
 ```
 
@@ -117,7 +126,7 @@ python -m src.main --topic "machine learning"
 | 字段 | 类型 | 说明 |
 |------|------|------|
 | `url` | string | 页面 URL |
-| `depth` | int | 爬取深度 |
+| `depth` | int | 爬取深度 (0=种子页面) |
 | `domain` | string | 域名 |
 | `title` | string | 页面标题 |
 | `keyword_hits` | int | 关键词匹配次数 |
@@ -138,6 +147,7 @@ python -m src.main --topic "machine learning"
   - 异步并发爬取
   - 重试机制（指数退避）
   - 获取 HTML 内容
+- **LLM 使用**：❌ 否（纯技术任务）
 - **输出**：`data_id`（传递给 ExtractorAgent）
 
 ### 2. ExtractorAgent（内容提取 Agent）
@@ -148,17 +158,29 @@ python -m src.main --topic "machine learning"
   - 提取外部链接
   - 链接规范化
   - 关键词匹配统计
+- **LLM 使用**：❌ 否（基于规则提取）
 - **输出**：提取的结构化数据
 
 ### 3. QualityGateAgent（质量判断 Agent）
 
 - **职责**：基于 LLM 和规则的质量评估
+- **技术栈**：**CAMEL ChatAgent** + OpenAI API
 - **功能**：
   - **Fast Filter**：在调用 LLM 前进行关键词命中和文本长度预判（低成本）
-  - **LLM Deep Evaluation**：根据页面摘要、标题、出链样例等进行深度语义评估
+  - **CAMEL LLM Deep Evaluation**：根据页面摘要、标题、出链样例等进行深度语义评估
   - **动态决策**：决定页面是否 `keep` (保存) 以及是否 `expand` (进一步爬取出链)
 - **输入**：ExtractorAgent 的结构化输出
 - **输出**：评估决策 (Keep/Discard, Expand/Don't-Expand, Priority)
+- **LLM 使用**：✅ 是（使用 CAMEL 框架）
+
+### 4. TaskCoordinator（任务协调器）
+
+- **职责**：协调各 Agent 间的任务流转和队列管理
+- **功能**：
+  - 异步任务队列管理
+  - 预算控制（最大页面数、域名限额等）
+  - **对话式协调（可选）**：使用 CAMEL ChatAgent 综合多个 Agent 的结果
+- **LLM 使用**：⚪ 可选（通过 `enable_conversation_coordinator` 启用）
 
 ## 任务协调流程
 
@@ -168,14 +190,15 @@ python -m src.main --topic "machine learning"
 └──────┬──────┘
        │
        ▼
-┌─────────────┐     ┌──────────────────┐     ┌──────────────────┐
-│CrawlerAgent │────▶│ ExtractorAgent   │────▶│QualityGateAgent │
-│(爬取页面)   │     │ (提取内容和链接)  │     │  (质量判断)      │
-└──────┬──────┘     └────────┬─────────┘     └────────┬─────────┘
-       │                     │                        │
-       ▼                     ▼                        ▼
-  data_id            结构化数据                决策 + 新URL
-   (共享存储)           (LLM评估)              (加入队列)
+┌─────────────┐     ┌──────────────────┐     ┌─────────────────┐     ┌──────────────────┐
+│CrawlerAgent │────▶│ ExtractorAgent   │────▶│QualityGateAgent │────▶│  Coordinator   │
+│(爬取页面)   │     │ (提取内容和链接)  │     │  (质量判断)      │     │(可选对话式协调) │
+│无需 LLM    │     │   无需 LLM       │     │  CAMEL LLM     │     │  可选 CAMEL    │
+└──────┬──────┘     └────────┬─────────┘     └────────┬─────────┘     └──────┬──────────┘
+       │                     │                        │                     │
+       ▼                     ▼                        ▼                     ▼
+  data_id            结构化数据                决策 + 新URL            综合决策
+   (共享存储)           (LLM评估)              (加入队列)              (可选)
 ```
 
 ## 成本优化
@@ -194,6 +217,32 @@ python -m src.main --topic "machine learning"
 - CrawlerAgent 不直接传递 HTML 内容，而是传递 `data_id`
 - 其他 Agent 通过 `DataManager` 从共享存储读取数据
 - 减少内存使用和消息传递开销
+
+## 对话式协调（可选功能）
+
+当启用对话式协调器时，TaskCoordinator 会使用另一个 CAMEL ChatAgent 综合各 Agent 的结果：
+
+**工作原理**：
+1. 收集 CrawlerAgent、ExtractorAgent、QualityGateAgent 的结果
+2. 通过 CAMEL ChatAgent 进行综合分析
+3. 输出协调后的最终决策
+
+**启用方式**：
+```python
+llm_config = LLMConfig(
+    enabled=True,
+    api_key=LLM_API_KEY,
+    model=LLM_MODEL,
+    base_url=LLM_BASE_URL,
+    enable_conversation_coordinator=True,  # 启用对话式协调
+    coordinator_model="gpt-3.5-turbo",      # 协调器使用的模型
+)
+```
+
+**决策原则**：
+- 优先尊重 QualityGateAgent 的专业判断
+- 只有在有明显冲突时才进行调整
+- 保持决策的一致性和可解释性
 
 ## 示例：爬取不同主题
 
@@ -244,6 +293,7 @@ python tests/test_smoke.py
 - API Key 是否正确
 - API 额度是否充足
 - BASE_URL 是否正确配置
+- `.env` 文件是否正确加载
 
 ### 3. 如何禁用 LLM 功能？
 
@@ -252,6 +302,15 @@ python tests/test_smoke.py
 ```python
 ENABLE_LLM = False  # 仅使用 fast_filter 进行判断
 ```
+
+### 4. CAMEL 初始化失败怎么办？
+
+如果看到类似 `[QualityGateAgent] Failed to initialize CAMEL agent` 的警告：
+
+检查：
+- `OPENAI_API_KEY` 是否正确设置
+- `OPENAI_BASE_URL` 是否可访问
+- 模型名称是否受支持（如 `gpt-4o-mini`, `gpt-3.5-turbo` 等）
 
 ## 贡献
 

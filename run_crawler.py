@@ -63,6 +63,8 @@ BLOCKED_DOMAINS = [
 
 # LLM 配置（从 .env 文件读取）
 ENABLE_LLM = True           # 设置为 True 启用 LLM
+ENABLE_CONVERSATION_COORDINATOR = True  # 启用对话式协调器，综合多 Agent 结果做出智能决策
+COORDINATOR_MODEL = os.getenv("COORDINATOR_MODEL", os.getenv("OPENAI_MODEL", "gpt-3.5-turbo"))  # 对话式协调器使用的模型（默认使用与 LLM 相同的模型）
 LLM_API_KEY = os.getenv("OPENAI_API_KEY", "")
 LLM_MODEL = os.getenv("OPENAI_MODEL", "gpt-3.5-turbo")
 LLM_BASE_URL = os.getenv("OPENAI_BASE_URL", "https://api.openai.com/v1")
@@ -83,6 +85,12 @@ CACHE_DIR = ".cache"
 
 def setup_logging():
     """设置日志"""
+    import warnings
+
+    # 过滤 asyncio 在 Windows 上的管道清理警告（不影响功能，只是噪音）
+    warnings.filterwarnings('ignore', category=ResourceWarning, message='.*unclosed transport.*')
+    warnings.filterwarnings('ignore', category=ResourceWarning, message='.*I/O operation on closed pipe.*')
+
     from loguru import logger
     logger.remove()
     logger.add(
@@ -126,6 +134,8 @@ async def main():
         model=LLM_MODEL,
         base_url=LLM_BASE_URL,
         fast_filter_min_keyword_hits=MIN_KEYWORD_HITS,
+        enable_conversation_coordinator=ENABLE_CONVERSATION_COORDINATOR,  # 启用对话式协调器
+        coordinator_model=COORDINATOR_MODEL,  # 协调器使用的模型
     )
 
     agent_config = AgentConfig(
@@ -143,6 +153,7 @@ async def main():
     logger.info(f"Max Pages: {MAX_PAGES}")
     logger.info(f"Concurrency: {CONCURRENCY}")
     logger.info(f"LLM Enabled: {ENABLE_LLM}")
+    logger.info(f"Conversation Coordinator: {ENABLE_CONVERSATION_COORDINATOR}")
     logger.info(f"Output: {OUTPUT_FILE}")
     logger.info("=" * 60)
 
