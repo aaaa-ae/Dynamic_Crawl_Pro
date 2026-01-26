@@ -117,7 +117,8 @@ python -m src.main --topic "machine learning"
   "headings": ["H1", "H2", ...],
   "decision": "keep",
   "priority": "high",
-  "reasons": "Contains detailed explanation of concept with code examples"
+  "reasons": "Contains detailed explanation of concept with code examples",
+  "main_content": "This is first 10000 characters of main content..."
 }
 ```
 
