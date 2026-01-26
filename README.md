@@ -156,11 +156,11 @@ python -m src.main --topic "machine learning"
 
 - **职责**：提取页面正文和链接
 - **功能**：
-  - 提取 main-content（正文内容）
+  - 提取 main-content（正文内容，后续可以使用llm进行内容摘要）
   - 提取外部链接
   - 链接规范化
   - 关键词匹配统计
-- **LLM 使用**：❌ 否（基于规则提取）
+- **LLM 使用**：❌ 否（目前是基于规则提取，后续可以改进）
 - **输出**：提取的结构化数据
 
 ### 3. QualityGateAgent（质量判断 Agent）
