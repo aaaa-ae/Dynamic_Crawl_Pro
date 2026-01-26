@@ -124,20 +124,21 @@ python -m src.main --topic "machine learning"
 
 ### 字段说明
 
-| 字段 | 类型 | 说明 |
-|------|------|------|
-| `url` | string | 页面 URL |
-| `depth` | int | 爬取深度 (0=种子页面) |
-| `domain` | string | 域名 |
-| `title` | string | 页面标题 |
-| `keyword_hits` | int | 关键词匹配次数 |
-| `content_hash` | string | 内容 MD5 哈希（用于去重） |
-| `text_snippet` | string | 正文前 300 字符 |
-| `extracted_links_count` | int | 提取的有效链接数 |
-| `headings` | array | 页面标题列表 |
-| `decision` | string | 决策：`keep` / `discard` |
-| `priority` | string | 优先级：`high` / `medium` / `low` |
-| `reasons` | string | 决策理由 |
+| 字段 | 类型 | 说明                                   |
+|------|------|--------------------------------------|
+| `url` | string | 页面 URL                               |
+| `depth` | int | 爬取深度 (0=种子页面)                        |
+| `domain` | string | 域名                                   |
+| `title` | string | 页面标题                                 |
+| `keyword_hits` | int | 关键词匹配次数                              |
+| `content_hash` | string | 内容 MD5 哈希（用于去重）                      |
+| `text_snippet` | string | 正文前 300 字符                           |
+| `extracted_links_count` | int | 提取的有效链接数                             |
+| `headings` | array | 页面标题列表                               |
+| `decision` | string | 决策：`keep` / `discard`                |
+| `priority` | string | 优先级：`high` / `medium` / `low`        |
+| `reasons` | string | 决策理由                                 |
+| `main_content` | string | 主要内容（页面前10000个字符，后续可以使用llm进行内容摘要等操作） |
 
 ## Agent 架构
 
