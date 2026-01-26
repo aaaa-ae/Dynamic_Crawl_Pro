@@ -2,6 +2,8 @@
 
 ```
 Dynamic_Crawl_Pro/
+├── docs/
+│   └── Pipeline1_and_2.md     # Pipeline 1（爬news） 和 Pipeline 2（深入爬知识点） 理解说明
 ├── src/                              # 源代码目录
 │   ├── __init__.py                   # 包初始化文件
 │   ├── config.py                     # 配置模块（核心、LLM、Agent配置）

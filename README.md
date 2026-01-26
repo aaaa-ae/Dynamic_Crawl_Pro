@@ -17,6 +17,8 @@
 
 ```
 Dynamic_Crawl_Pro/
+├── docs/
+│   └── Pipeline1_and_2.md     # Pipeline 1（爬news） 和 Pipeline 2（深入爬知识点） 理解说明
 ├── src/
 │   ├── __init__.py
 │   ├── config.py              # 集中式配置
