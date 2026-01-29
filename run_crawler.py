@@ -42,9 +42,9 @@ SEED_URLS = [
 ]
 
 # 预算参数
-MAX_DEPTH = 3                # 最大爬取深度（增加以体现 Deep Research）
-MAX_PAGES = 50               # 最大页面数（增加以爬取更多链接）
-MAX_PAGES_PER_DOMAIN = 15    # 每个域名最大页面数
+MAX_DEPTH = 5                # 最大爬取深度（增加以体现 Deep Research）
+MAX_PAGES = 100               # 最大页面数（增加以爬取更多链接）
+MAX_PAGES_PER_DOMAIN = 30    # 每个域名最大页面数
 CONCURRENCY = 3              # 并发爬取数
 
 # 域名控制（只允许英文站点）
