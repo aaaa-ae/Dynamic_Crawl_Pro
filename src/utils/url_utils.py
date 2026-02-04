@@ -4,9 +4,9 @@ URL 工具模块
 """
 
 import re
-from urllib.parse import urlparse, urljoin, urlunparse
 from typing import List, Optional, Set
 from dataclasses import dataclass
+from urllib.parse import urlparse, urlunparse, urljoin, parse_qsl, urlencode
 
 
 @dataclass
@@ -17,49 +17,106 @@ class ParsedLink:
     title: Optional[str] = None
 
 
+# 常见追踪/无意义参数（可以按需再加）
+_TRACKING_PARAMS = {
+    "utm_source", "utm_medium", "utm_campaign", "utm_term", "utm_content",
+    "spm", "from", "ref", "source", "share", "scene", "timestamp",
+    "nsukey", "eqid", "vd_source"
+}
+
+# index 页面折叠
+_INDEX_PATTERN = re.compile(r"/index\.(html?|shtml)$", re.IGNORECASE)
+
+
 def normalize_url(url: str, base_url: str = None) -> Optional[str]:
     """
-    规范化 URL
+    爬虫级 URL 规范化（强去重版）
+
+    目标：
+    - 同内容 URL 尽量归并
+    - 减少队列重复任务
+    - 提升整体爬取性能
 
     Args:
         url: 原始 URL
         base_url: 基础 URL（用于相对链接）
 
     Returns:
-        规范化后的绝对 URL，如果无效则返回 None
+        规范化后的 canonical URL，或 None
     """
-    if not url or url.startswith(("mailto:", "tel:", "javascript:", "data:", "#")):
+    if not url:
         return None
 
-    # 如果有 base_url，解析相对链接
+    url = url.strip()
+
+    # 明确无效 scheme
+    if url.startswith(("mailto:", "tel:", "javascript:", "data:", "#")):
+        return None
+
+    # 相对链接转绝对
     if base_url:
-        url = urljoin(base_url, url)
+        try:
+            url = urljoin(base_url, url)
+        except Exception:
+            return None
 
     try:
         parsed = urlparse(url)
 
-        # 移除 fragment
-        parsed = parsed._replace(fragment="")
-
-        # 规范化 scheme 和 netloc
+        # scheme / netloc 必须存在
         scheme = parsed.scheme.lower() if parsed.scheme else "https"
-        netloc = parsed.netloc.lower() if parsed.netloc else ""
+        netloc = parsed.netloc.lower()
 
         if not netloc:
             return None
 
-        # 移除端口号（如果是标准端口）
+        # 去标准端口
         if (scheme == "http" and netloc.endswith(":80")) or \
            (scheme == "https" and netloc.endswith(":443")):
             netloc = netloc.rsplit(":", 1)[0]
 
-        # 移除多余的斜杠
-        path = re.sub(r'/+', '/', parsed.path) or "/"
+        # ---------- PATH 规范化 ----------
+        path = parsed.path or "/"
 
-        # 规范化查询参数（按字母排序）
-        query = "&".join(sorted(parsed.query.split("&"))) if parsed.query else ""
+        # 多斜杠合并
+        path = re.sub(r"/{2,}", "/", path)
 
-        normalized = urlunparse((scheme, netloc, path, parsed.params, query, ""))
+        # 折叠 index 页面
+        path = _INDEX_PATTERN.sub("/", path)
+
+        # 去尾部斜杠（根路径除外）
+        if path != "/" and path.endswith("/"):
+            path = path[:-1]
+
+        # ---------- QUERY 规范化 ----------
+        if parsed.query:
+            # 拆 query → 过滤 tracking → 排序
+            items = []
+            for k, v in parse_qsl(parsed.query, keep_blank_values=False):
+                lk = k.lower()
+                if lk in _TRACKING_PARAMS:
+                    continue
+                if not v:
+                    continue
+                items.append((k, v))
+
+            # 排序保证一致性
+            items.sort()
+
+            query = urlencode(items)
+        else:
+            query = ""
+
+        # fragment 一律丢弃
+        normalized = urlunparse((
+            scheme,
+            netloc,
+            path,
+            "",       # params 已废弃
+            query,
+            "",       # fragment
+        ))
+
         return normalized
 
     except Exception:

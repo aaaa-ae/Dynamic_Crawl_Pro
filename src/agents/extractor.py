@@ -228,7 +228,8 @@ class ExtractorAgent(BaseAgent):
         allowed_domains = input_data.get("allowed_domains", [])
         blocked_domains = input_data.get("blocked_domains", [])
 
-        # 如果提供了 data_id，从数据管理器获取数据
+        # 优化：统一获取 page_data（只获取一次）
+        page_data = None
         if data_id and self.data_manager:
             page_data = self.data_manager.get_page(data_id)
             if page_data:
@@ -259,20 +260,26 @@ class ExtractorAgent(BaseAgent):
         logger.info(f"[{self.name}] Extracting from: {url}")
 
         try:
-            # 提取主要内容
-            content_data = self.extract_main_content(html, markdown)
-            main_content = content_data["main_content"]
+            # 优先使用 clean_content（trafilatura 提取的干净正文）
+            if page_data and page_data.clean_content:
+                # 使用 trafilatura 提取的干净正文
+                main_content = page_data.clean_content
+                logger.info(f"[{self.name}] Using trafilatura clean_content ({len(main_content)} chars)")
+            else:
+                # 回退到旧的提取方式
+                content_data = self.extract_main_content(html, markdown)
+                main_content = content_data["main_content"]
 
-            # 提取标题
+            # 提取标题（从 markdown 或 html）
             headings = extract_headings(markdown or html, self.extract_headings_max)
 
-            # 统计关键词匹配
+            # 统计关键词匹配（main_content 已经是干净的文本）
             keyword_hits = count_keyword_hits(main_content, self.keywords)
 
             # 计算内容哈希
             content_hash = compute_content_hash(main_content)
 
-            # 获取文本摘要
+            # 获取文本摘要（直接使用 main_content，因为已经是干净的）
             text_snippet = get_text_snippet(main_content, self.extract_text_snippet_length)
 
             # 提取链接

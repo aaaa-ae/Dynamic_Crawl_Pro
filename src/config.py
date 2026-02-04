@@ -16,6 +16,9 @@ class CrawlConfig:
     keywords: List[str] = field(default_factory=lambda: ["dynamic programming", "dp", "动态规划"])
     seed_urls: List[str] = field(default_factory=list)
 
+    # 上下文配置（用于 LLM 判断）
+    context: dict = field(default_factory=dict)  # 幻灯片上下文 {slide_title, slide_reason}
+
     # 预算参数
     max_depth: int = 3
     max_pages: int = 100
@@ -77,6 +80,21 @@ class AgentConfig:
     # 链接提取配置
     extract_links_max: int = 50
     filter_same_domain: bool = True
+
+    # 过滤与路由配置
+    fast_discard_min_chars: int = 80
+    high_hit_threshold: int = 3
+    llm_hit_range: List[int] = field(default_factory=lambda: [1, 2])
+
+    # 零命中LLM评估配置
+    llm_on_zero_hits: bool = True
+    zero_hits_llm_min_rule_score: float = 0.15
+    zero_hits_llm_min_chars: int = 250
+
+    # 扩链策略配置
+    enable_expand: bool = True
+    expand_min_score: float = 0.45
+    expand_priority_allow: List[str] = field(default_factory=lambda: ["high", "medium"])
 
 
 # 默认配置实例

@@ -2,11 +2,16 @@
 QualityGateAgent - 质量判断 Agent
 使用 LLM 对页面进行质量判断和决策
 使用 CAMEL 框架集成
+
+【2026-02 修订版】
+- 允许 expand_links=true，使 Coordinator 能进行深度扩链
+- keyword_hits==0 场景：规则粗筛后可调用 LLM（预算可控）
+- 更强可观测日志：decision/priority/score/expand/len/hits
 """
 
 import json
 import asyncio
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional
 from loguru import logger
 
 # CAMEL imports
@@ -16,7 +21,6 @@ from camel.models import ModelFactory
 
 from .base import BaseAgent
 from ..utils import (
-    fast_filter,
     calculate_content_quality_score,
     truncate_text,
 )
@@ -36,52 +40,56 @@ class QualityGateAgent(BaseAgent):
         keywords: List[str] = None,
         llm_config: Dict[str, Any] = None,
     ):
-        """
-        初始化 QualityGateAgent
-
-        Args:
-            name: Agent 名称
-            config: 配置字典
-            keywords: 关键词列表
-            llm_config: LLM 配置，包含:
-                - enabled: 是否启用 LLM
-                - api_key: API Key
-                - model: 模型名称
-                - base_url: API 基础 URL
-                - temperature: 温度参数
-                - max_tokens: 最大 Token 数
-        """
         super().__init__(name, config)
         self.keywords = keywords or []
         self.llm_config = llm_config or {}
 
-        # 配置参数
-        self.fast_filter_min_length = config.get("fast_filter_min_length", 500)
-        self.fast_filter_min_keyword_hits = config.get("fast_filter_min_keyword_hits", 1)
-        self.quality_decision_threshold = config.get("quality_decision_threshold", 0.6)
+        # =========================
+        # 过滤与路由相关阈值
+        # =========================
+        self.fast_discard_min_chars = self.config.get("fast_discard_min_chars", 80)
 
+        # keyword_hits 路由
+        self.high_hit_threshold = self.config.get("high_hit_threshold", 3)  # >=3 直接高相关 keep
+        self.llm_hit_range = self.config.get("llm_hit_range", [1, 2])       # hits=1/2 调 LLM
+
+        # hits==0 是否允许调 LLM（强烈建议 True）
+        self.llm_on_zero_hits = self.config.get("llm_on_zero_hits", True)
+        self.zero_hits_llm_min_rule_score = self.config.get("zero_hits_llm_min_rule_score", 0.15)
+        self.zero_hits_llm_min_chars = self.config.get("zero_hits_llm_min_chars", 250)
+
+        # 决策阈值（fallback）
+        self.quality_decision_threshold = self.config.get("quality_decision_threshold", 0.35)
+
+        # =========================
+        # 扩链策略
+        # =========================
+        # expand 由 Gate 决定，Coordinator 依赖 expand 才会入队出链
+        self.enable_expand = self.config.get("enable_expand", True)
+        self.expand_min_score = self.config.get("expand_min_score", 0.45)
+        self.expand_priority_allow = set(self.config.get("expand_priority_allow", ["high", "medium"]))
+
+        # =========================
+        # 幻灯片上下文
+        # =========================
+        self.slide_context = self.config.get("context", {}) or self.llm_config.get("context", {})
+        self.slide_title = self.slide_context.get("slide_title", "")
+        self.slide_reason = self.slide_context.get("slide_reason", "")
+
+        # =========================
         # LLM 配置
+        # =========================
         self.llm_enabled = self.llm_config.get("enabled", True)
         self.camel_agent = None
-
         if self.llm_enabled and self.llm_config.get("api_key"):
             self._init_camel_agent()
 
         logger.info(
-            f"[{self.name}] Initialized with LLM={'enabled' if self.llm_enabled else 'disabled'}, "
-            f"{len(self.keywords)} keywords"
+            f"[{self.name}] Initialized | llm={'on' if self.llm_enabled else 'off'} | "
+            f"keywords={len(self.keywords)} | expand={'on' if self.enable_expand else 'off'}"
         )
 
     def _map_model_name(self, model_name: str) -> ModelType:
-        """
-        将模型名称映射到 CAMEL 的 ModelType 枚举
-
-        Args:
-            model_name: 模型名称字符串
-
-        Returns:
-            CAMEL ModelType 枚举值
-        """
         model_mapping = {
             "gpt-4": ModelType.GPT_4,
             "gpt-4-turbo": ModelType.GPT_4_TURBO,
@@ -92,7 +100,6 @@ class QualityGateAgent(BaseAgent):
             "gpt-35-turbo": ModelType.GPT_3_5_TURBO,
         }
 
-        # 移除可能的前缀
         clean_name = model_name.lower()
         if clean_name.startswith("openai/"):
             clean_name = clean_name[7:]
@@ -100,20 +107,18 @@ class QualityGateAgent(BaseAgent):
         return model_mapping.get(clean_name, ModelType.GPT_3_5_TURBO)
 
     def _init_camel_agent(self):
-        """初始化 CAMEL ChatAgent"""
         try:
-            # 系统消息使用字符串格式
-            system_message = "你是一个内容质量评估专家，专门评估网页内容与目标知识点的相关性。请严格按照 JSON 格式返回评估结果。"
+            system_message = (
+                "你是一个内容质量评估专家，专门评估网页内容与目标知识点的相关性与教学价值。"
+                "请严格按照 JSON 格式返回评估结果。"
+            )
 
-            # 获取配置
             model_name = self.llm_config.get("model", "gpt-3.5-turbo")
             base_url = self.llm_config.get("base_url", "https://api.openai.com/v1")
             api_key = self.llm_config.get("api_key")
 
-            # 如果使用自定义 base_url，使用 OPENAI_COMPATIBLE_MODEL
             is_custom_base_url = "openai.com" not in base_url
 
-            # 创建模型实例 (使用 url 参数而不是 base_url)
             model = ModelFactory.create(
                 model_platform=ModelPlatformType.OPENAI_COMPATIBLE_MODEL if is_custom_base_url else ModelPlatformType.OPENAI,
                 model_type=self._map_model_name(model_name),
@@ -121,7 +126,6 @@ class QualityGateAgent(BaseAgent):
                 url=base_url,
             )
 
-            # 创建 ChatAgent
             self.camel_agent = ChatAgent(
                 system_message=system_message,
                 model=model,
@@ -133,40 +137,67 @@ class QualityGateAgent(BaseAgent):
             self.llm_enabled = False
 
     def _build_evaluation_prompt(self, extracted_data: Dict[str, Any]) -> str:
-        """
-        构建评估提示词
-
-        Args:
-            extracted_data: ExtractorAgent 提取的数据
-
-        Returns:
-            格式化的提示词字符串
-        """
         url = extracted_data.get("url", "")
         title = extracted_data.get("title", "")
         main_content = extracted_data.get("main_content", "")
         headings = extracted_data.get("headings", [])
         keyword_hits = extracted_data.get("keyword_hits", 0)
-        extracted_links = extracted_data.get("extracted_links", [])[:5]  # 最多 5 个链接样例
+        extracted_links = extracted_data.get("extracted_links", [])[:8]
 
-        # 截断内容（控制在合理范围内）
-        content_preview = truncate_text(main_content, 1200)
+        content_preview = truncate_text(main_content, 1400)
 
-        # 构造链接样例
         link_samples = "\n".join([
-            f"- {link['text']}: {link['url']}"
+            f"- {link.get('text', '')[:40]}: {link.get('url', '')}"
             for link in extracted_links
         ]) if extracted_links else "(无)"
 
-        # 构造标题列表
         headings_str = "\n".join([f"- {h}" for h in headings[:10]]) if headings else "(无)"
 
-        # 构造提示词
-        prompt = f"""你是一个智能内容质量评估助手，专门评估网页内容与目标知识点的相关性。
+        # 上下文是否有意义（保留你的过滤策略）
+        context_section = ""
+        reason_has_value = False
+        if self.slide_reason and len(self.slide_reason) > 10:
+            meaningless_reasons = ["无内容", "封面页", "目录页", "不需要优化"]
+            if not any(r in self.slide_reason for r in meaningless_reasons):
+                reason_has_value = True
 
-目标知识点: {", ".join(self.keywords[:5])}
+        title_has_value = False
+        if self.slide_title and len(self.slide_title) > 5:
+            meaningless_patterns = ["第一讲", "第二讲", "第三讲", "第四讲",
+                                   "第五讲", "第六讲", "第七讲", "第八讲",
+                                   "第九讲", "第十讲", "第十一讲", "第十二讲",
+                                   "第十三讲", "第十四讲", "第十五讲", "第十六讲",
+                                   "导言", "目录", "封面", "封底"]
+            if not any(pattern in self.slide_title for pattern in meaningless_patterns):
+                title_has_value = True
 
-请评估以下页面的质量：
+        if reason_has_value or title_has_value:
+            context_section = "\n\n【教学上下文】\n"
+            if title_has_value:
+                context_section += f"- 当前幻灯片: {self.slide_title}\n"
+            if reason_has_value:
+                context_section += f"- 优化原因: {self.slide_reason}\n"
+            context_section += (
+                "请结合教学上下文理解关键词的语义关联：即使网页标题不含关键词，只要能解释幻灯片主题也应视为相关。\n"
+            )
+
+        # ✅ 关键：不再写死 expand_links=false；允许模型建议扩链
+        prompt = f"""你是一个智能内容质量评估助手，专门评估网页内容与目标关键词的语义相关性及教学价值。{context_section}
+
+【重要：跨语言语义理解】
+- 目标关键词可能是中文，但网页内容可能是英文（或反之）
+- 请判断**语义关联度**，而非字面关键词匹配
+- 即使关键词在文本中完全没有出现（keyword_hits=0），只要语义相关就保留
+
+【评估原则】
+1. 语义优先：判断主题与概念是否相关
+2. 理解翻译对应：主动理解中文关键词的英文表达（及反向）
+3. 隐性关联：标题不含关键词但讨论相关主题也可保留
+4. 教学价值：是否有助于解释、举例、扩展该知识点
+
+目标关键词: {", ".join(self.keywords[:8])}
+
+请评估以下页面：
 
 页面 URL: {url}
 页面标题: {title}
@@ -174,72 +205,49 @@ class QualityGateAgent(BaseAgent):
 页面标题列表:
 {headings_str}
 
-正文内容摘要（前1200字）:
+正文内容摘要（前1400字）:
 {content_preview}
 
-关键词匹配次数: {keyword_hits}
+⚠️ 关键词匹配次数: {keyword_hits}
 
-出链样例:
+出链样例（最多8条）:
 {link_samples}
 
-请严格按照以下 JSON 格式返回评估结果（不要添加任何其他文本）:
+请严格按 JSON 返回（不要输出其它任何文本）:
 {{
-    "keep_page": true/false,
-    "expand_links": true/false,
-    "priority": "high"/"medium"/"low",
-    "relevance_score": 0.0-1.0,
-    "reasons": "简短说明决策理由，例如：'包含详细的算法讲解和代码示例，与目标知识点高度相关'"
+  "keep_page": true/false,
+  "expand_links": true/false,
+  "priority": "high"/"medium"/"low",
+  "relevance_score": 0.0-1.0,
+  "reasons": "简短说明决策理由，需解释语义相关依据"
 }}
 
-评估标准：
-- keep_page: 页面是否值得保存（内容是否与目标知识点相关、是否有价值）
-- expand_links: 是否应该继续爬取该页面中的链接
-- priority: 页面优先级（high=核心内容/质量很高，medium=相关但非核心，low=弱相关）
-- relevance_score: 相关性评分（0-1，1 表示完全相关）
-- reasons: 决策理由，50-100字
-
-请只返回 JSON 格式的结果，不要添加任何其他文字或解释。
+建议：
+- keep_page: 语义相关且有参考/教学价值
+- expand_links: 如果该页像“目录/专题/聚合页”或能继续发现大量相关内容，可设为 true
+- priority: high=高度相关且高质量；medium=相关；low=弱相关但可参考
+- relevance_score: 0.0-1.0（0.3以上为相关，0.6以上为高相关）
 """
         return prompt
 
     async def _camel_evaluate(self, extracted_data: Dict[str, Any]) -> Optional[Dict[str, Any]]:
-        """
-        使用 CAMEL ChatAgent 进行深度评估
-
-        Args:
-            extracted_data: ExtractorAgent 提取的数据
-
-        Returns:
-            LLM 评估结果
-        """
         if not self.camel_agent or not self.llm_enabled:
             return None
 
-        # 构建提示词
         prompt = self._build_evaluation_prompt(extracted_data)
 
         try:
-            # 使用 asyncio.to_thread 包装同步调用
-            response = await asyncio.to_thread(
-                self.camel_agent.step,
-                prompt  # 直接传递字符串作为用户消息
-            )
-
-            # 提取响应内容
+            response = await asyncio.to_thread(self.camel_agent.step, prompt)
             content = response.msgs[0].content if response.msgs else ""
 
-            # 尝试解析 JSON
             try:
-                # 提取 JSON 部分（处理可能的额外文本）
                 json_start = content.find('{')
                 json_end = content.rfind('}') + 1
                 if json_start >= 0 and json_end > json_start:
-                    json_content = content[json_start:json_end]
-                    return json.loads(json_content)
-                else:
-                    return json.loads(content)
+                    return json.loads(content[json_start:json_end])
+                return json.loads(content)
             except json.JSONDecodeError:
-                logger.warning(f"[{self.name}] Failed to parse LLM response: {content}")
+                logger.warning(f"[{self.name}] Failed to parse LLM response: {content[:200]}...")
                 return None
 
         except Exception as e:
@@ -247,163 +255,180 @@ class QualityGateAgent(BaseAgent):
             return None
 
     def can_process(self, input_data: Any) -> bool:
-        """
-        检查是否能够处理该输入
-
-        Args:
-            input_data: 输入数据，应为包含提取数据的字典
-
-        Returns:
-            是否能够处理
-        """
         if not isinstance(input_data, dict):
             return False
-
-        # 检查必要的字段
         required_fields = ["main_content", "keyword_hits", "url", "headings"]
         return all(field in input_data for field in required_fields)
 
+    def _should_expand(self, decision: str, priority: str, score: float) -> bool:
+        if not self.enable_expand:
+            return False
+        if decision != "keep":
+            return False
+        if priority in self.expand_priority_allow:
+            return True
+        return score >= self.expand_min_score
+
     async def process(self, input_data: Any) -> Optional[Dict[str, Any]]:
-        """
-        处理输入数据，进行质量判断
-
-        Args:
-            input_data: 输入数据字典，包含 ExtractorAgent 的输出
-
-        Returns:
-            质量判断结果，格式:
-            {
-                "success": bool,
-                "decision": "keep" | "discard",
-                "expand": bool,
-                "priority": "high" | "medium" | "low",
-                "reasons": str,
-                "relevance_score": float,
-                "method": "fast_filter" | "llm" | "rule_based",
-                "url": str,
-            }
-        """
-        # 提取字段
         url = input_data.get("url", "")
-        main_content = input_data.get("main_content", "")
-        keyword_hits = input_data.get("keyword_hits", 0)
-        headings = input_data.get("headings", [])
+        main_content = input_data.get("main_content", "") or ""
+        keyword_hits = int(input_data.get("keyword_hits", 0) or 0)
+        headings = input_data.get("headings", []) or []
 
-        logger.info(f"[{self.name}] Evaluating: {url} (keyword_hits={keyword_hits})")
+        content_len = len(main_content)
+
+        logger.info(
+            f"[{self.name}] Evaluating | hits={keyword_hits} | len={content_len} | url={url}"
+        )
 
         try:
-            # 步骤1: 快速过滤器（基于规则）
-            passed, filter_reason = fast_filter(
-                text=main_content,
-                keywords=self.keywords,
-                min_length=self.fast_filter_min_length,
-                min_keyword_hits=self.fast_filter_min_keyword_hits,
-            )
-
-            if not passed:
-                logger.info(f"[{self.name}] Fast filter discarded: {url} - {filter_reason}")
+            # 层级0：极短垃圾页直接丢
+            if content_len < self.fast_discard_min_chars:
                 return {
                     "success": True,
                     "decision": "discard",
                     "expand": False,
                     "priority": "low",
-                    "reasons": filter_reason,
+                    "reasons": f"too short ({content_len} chars)",
                     "relevance_score": 0.0,
-                    "method": "fast_filter",
+                    "method": "fast_discard",
                     "url": url,
                 }
 
-            # 步骤2: 如果 LLM 未启用，使用基于规则的判断
-            if not self.llm_enabled or not self.camel_agent:
-                quality_score = calculate_content_quality_score(
-                    text=main_content,
-                    keywords=self.keywords,
-                    headings=headings,
-                )
-
-                if quality_score >= self.quality_decision_threshold:
-                    decision = "keep"
-                    expand = quality_score >= 0.7  # 高分页面才继续扩展
-                    priority = "high" if quality_score >= 0.8 else "medium"
-                else:
-                    decision = "discard"
-                    expand = False
-                    priority = "low"
-
-                reasons = f"Rule-based decision: quality_score={quality_score:.2f}"
-
-                logger.info(
-                    f"[{self.name}] Rule-based decision for {url}: {decision}, "
-                    f"priority={priority}, score={quality_score:.2f}"
-                )
-
+            # 层级1：hits 很高直接通过（省钱）
+            if keyword_hits >= self.high_hit_threshold:
+                score = min(0.92, 0.35 + keyword_hits * 0.10)
+                decision = "keep"
+                priority = "high"
+                expand = self._should_expand(decision, priority, score)
                 return {
                     "success": True,
                     "decision": decision,
                     "expand": expand,
                     "priority": priority,
-                    "reasons": reasons,
-                    "relevance_score": quality_score,
-                    "method": "rule_based",
+                    "reasons": f"keyword_hits={keyword_hits} (fast pass)",
+                    "relevance_score": score,
+                    "method": "keyword_fast_pass",
                     "url": url,
                 }
 
-            # 步骤3: LLM 深度评估（使用 CAMEL）
-            llm_result = await self._camel_evaluate(input_data)
+            # 先算规则分，作为预算门槛/兜底
+            rule_score = calculate_content_quality_score(
+                text=main_content,
+                keywords=self.keywords,
+                headings=headings,
+            )
 
-            if llm_result:
-                decision = "keep" if llm_result.get("keep_page", False) else "discard"
-                expand = llm_result.get("expand_links", False)
-                priority = llm_result.get("priority", "medium")
-                reasons = llm_result.get("reasons", "")
-                relevance_score = llm_result.get("relevance_score", 0.0)
+            # 层级2：hits=1/2 → LLM 精判
+            if keyword_hits in self.llm_hit_range and self.llm_enabled:
+                llm_result = await self._camel_evaluate(input_data)
+                if llm_result:
+                    decision = "keep" if llm_result.get("keep_page", False) else "discard"
+                    priority = llm_result.get("priority", "medium")
+                    score = float(llm_result.get("relevance_score", 0.0) or 0.0)
+                    # LLM 若没给 expand_links，按 Gate 策略补全
+                    llm_expand = bool(llm_result.get("expand_links", False))
+                    expand = llm_expand or self._should_expand(decision, priority, score)
 
-                logger.info(
-                    f"[{self.name}] CAMEL LLM decision for {url}: {decision}, "
-                    f"expand={expand}, priority={priority}, score={relevance_score:.2f}"
-                )
+                    reasons = llm_result.get("reasons", "") or f"llm judged (rule_score={rule_score:.2f})"
 
+                    logger.info(
+                        f"[{self.name}] LLM | decision={decision} | prio={priority} | score={score:.2f} | "
+                        f"expand={expand} | url={url}"
+                    )
+
+                    return {
+                        "success": True,
+                        "decision": decision,
+                        "expand": expand,
+                        "priority": priority,
+                        "reasons": reasons,
+                        "relevance_score": score,
+                        "method": "llm",
+                        "url": url,
+                    }
+
+                # LLM 失败：fallback 到规则
+                decision = "keep" if rule_score >= self.quality_decision_threshold else "discard"
+                priority = "medium" if decision == "keep" else "low"
+                expand = self._should_expand(decision, priority, rule_score)
                 return {
                     "success": True,
                     "decision": decision,
                     "expand": expand,
                     "priority": priority,
-                    "reasons": reasons,
-                    "relevance_score": relevance_score,
-                    "method": "llm",
-                    "url": url,
-                }
-            else:
-                # LLM 调用失败，回退到基于规则的判断
-                quality_score = calculate_content_quality_score(
-                    text=main_content,
-                    keywords=self.keywords,
-                    headings=headings,
-                )
-
-                decision = "keep" if quality_score >= self.quality_decision_threshold else "discard"
-                expand = decision == "keep" and quality_score >= 0.7
-                priority = "high" if quality_score >= 0.8 else ("medium" if quality_score >= 0.5 else "low")
-                reasons = f"LLM fallback: quality_score={quality_score:.2f}"
-
-                logger.warning(
-                    f"[{self.name}] CAMEL LLM failed, using fallback for {url}: {decision}"
-                )
-
-                return {
-                    "success": True,
-                    "decision": decision,
-                    "expand": expand,
-                    "priority": priority,
-                    "reasons": reasons,
-                    "relevance_score": quality_score,
+                    "reasons": f"llm_failed fallback rule_score={rule_score:.2f}",
+                    "relevance_score": rule_score,
                     "method": "llm_fallback",
                     "url": url,
                 }
 
+            # 层级3：hits==0 → 规则粗筛后可 LLM（关键改动）
+            if keyword_hits == 0 and self.llm_enabled and self.llm_on_zero_hits:
+                if rule_score >= self.zero_hits_llm_min_rule_score and content_len >= self.zero_hits_llm_min_chars:
+                    llm_result = await self._camel_evaluate(input_data)
+                    if llm_result:
+                        decision = "keep" if llm_result.get("keep_page", False) else "discard"
+                        priority = llm_result.get("priority", "low")
+                        score = float(llm_result.get("relevance_score", 0.0) or 0.0)
+                        llm_expand = bool(llm_result.get("expand_links", False))
+                        expand = llm_expand or self._should_expand(decision, priority, score)
+                        reasons = llm_result.get("reasons", "") or f"llm judged (rule_score={rule_score:.2f})"
+
+                        logger.info(
+                            f"[{self.name}] LLM@0hits | decision={decision} | prio={priority} | score={score:.2f} | "
+                            f"expand={expand} | url={url}"
+                        )
+
+                        return {
+                            "success": True,
+                            "decision": decision,
+                            "expand": expand,
+                            "priority": priority,
+                            "reasons": reasons,
+                            "relevance_score": score,
+                            "method": "llm_zero_hits",
+                            "url": url,
+                        }
+
+                    # LLM 失败：fallback 规则
+                    decision = "keep" if rule_score >= self.quality_decision_threshold else "discard"
+                    priority = "low" if decision == "keep" else "low"
+                    expand = self._should_expand(decision, priority, rule_score)
+                    return {
+                        "success": True,
+                        "decision": decision,
+                        "expand": expand,
+                        "priority": priority,
+                        "reasons": f"llm@0hits failed fallback rule_score={rule_score:.2f}",
+                        "relevance_score": rule_score,
+                        "method": "llm_zero_hits_fallback",
+                        "url": url,
+                    }
+
+            # 层级4：纯规则决策（兜底）
+            decision = "keep" if rule_score >= self.quality_decision_threshold else "discard"
+            priority = "medium" if rule_score >= 0.6 else ("low" if decision == "keep" else "low")
+            expand = self._should_expand(decision, priority, rule_score)
+
+            logger.info(
+                f"[{self.name}] RULE | decision={decision} | prio={priority} | score={rule_score:.2f} | "
+                f"expand={expand} | url={url}"
+            )
+
+            return {
+                "success": True,
+                "decision": decision,
+                "expand": expand,
+                "priority": priority,
+                "reasons": f"rule_score={rule_score:.2f}",
+                "relevance_score": rule_score,
+                "method": "rule_based",
+                "url": url,
+            }
+
         except Exception as e:
             logger.error(f"[{self.name}] Error evaluating {url}: {e}")
-            # 出错时保守处理：保存页面但不扩展
             return {
                 "success": False,
                 "decision": "discard",
@@ -416,9 +441,7 @@ class QualityGateAgent(BaseAgent):
             }
 
     async def cleanup(self):
-        """清理资源"""
         if self.camel_agent:
-            # CAMEL ChatAgent 不需要显式关闭
             logger.info(f"[{self.name}] CAMEL ChatAgent cleanup completed")
 
 
@@ -428,18 +451,6 @@ def create_quality_gate_agent(
     keywords: List[str] = None,
     llm_config: Dict[str, Any] = None,
 ) -> QualityGateAgent:
-    """
-    工厂函数：创建 QualityGateAgent 实例
-
-    Args:
-        name: Agent 名称
-        config: 配置字典
-        keywords: 关键词列表
-        llm_config: LLM 配置
-
-    Returns:
-        QualityGateAgent 实例
-    """
     return QualityGateAgent(
         name=name,
         config=config or {},

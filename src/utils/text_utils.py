@@ -10,7 +10,7 @@ from typing import List, Dict, Set, Tuple
 
 def count_keyword_hits(text: str, keywords: List[str]) -> int:
     """
-    统计文本中关键词匹配次数
+    统计文本中关键词匹配次数（支持中文）
 
     Args:
         text: 待搜索的文本
@@ -29,10 +29,19 @@ def count_keyword_hits(text: str, keywords: List[str]) -> int:
         if not keyword:
             continue
         keyword_lower = keyword.lower()
-        # 使用正则进行单词边界匹配，提高准确性
-        pattern = r'\b' + re.escape(keyword_lower) + r'\b'
-        matches = re.findall(pattern, text_lower)
-        total_hits += len(matches)
+
+        # 判断是否包含中文字符
+        has_chinese = any('\u4e00' <= char <= '\u9fff' for char in keyword)
+
+        if has_chinese:
+            # 中文：直接子串匹配（不使用单词边界）
+            matches = text_lower.count(keyword_lower)
+            total_hits += matches
+        else:
+            # 英文：使用单词边界匹配，提高准确性
+            pattern = r'\b' + re.escape(keyword_lower) + r'\b'
+            matches = re.findall(pattern, text_lower)
+            total_hits += len(matches)
 
     return total_hits
 
@@ -64,16 +73,16 @@ def extract_headings(text: str, max_headings: int = 10) -> List[str]:
     return headings
 
 
-def get_text_snippet(text: str, max_length: int = 300) -> str:
+def get_text_snippet(text: str, max_length: int = 500) -> str:
     """
-    获取文本摘要片段（跳过导航菜单）
+    获取智能文本摘要片段（首段 + 尾段）
 
     Args:
         text: 原始文本
         max_length: 最大长度
 
     Returns:
-        文本摘要（截断并添加省略号）
+        文本摘要（首段 + 尾段，用省略号连接）
     """
     if not text:
         return ""
@@ -81,68 +90,33 @@ def get_text_snippet(text: str, max_length: int = 300) -> str:
     # 移除多余空白
     text = re.sub(r'\s+', ' ', text).strip()
 
-    # 策略：跳过常见的导航模式
-    skip_patterns = [
-        r'\[Main menu\]',
-        r'\[Contents\]',
-        r'\[Jump to content\]',
-        r'\[Current events\]',
-        r'\[Random article\]',
-        r'\[About Wikipedia\]',
-        r'\[Contact us\]',
-        r'\[Contribute',
-        r'\[Help\]',
-        r'\[Community portal\]',
-        r'\[Recent changes\]',
-        r'\[Upload file\]',
-        r'\[Special pages\]',
-        r'\[Donate',
-        r'\[Create account\]',
-        r'\[Log in\]',
-        r'\[Appearance',
-        r'\[Search',
-        r'Sign In',
-        r'Register',
-        r'Courses',
-        r'\* Courses',
-        r'\* Tutorials',
-        r'\* Interview Prep',
-        r'\* DSA Tutorial',
-        r'\* Interview Questions',
-        r'\* Quizzes',
-        r'\* Must Do',
-        r'\* Advanced DSA',
-        r'\* System Design',
-        r'\* Aptitude',
-        r'\* Puzzles',
-        r'\* Interview Corner',
-        r'\* DSA Python',
-        r'## Contents',
-    ]
+    # 按段落分割（以双换行或单换行分割）
+    paragraphs = re.split(r'\n\s*\n', text)
 
-    # 方法1：跳过导航部分（从第一个实际内容开始）
-    lines = text.split('\n')
-    content_start = 0
-    for i, line in enumerate(lines):
-        # 跳过导航行（包含特定链接的行）
-        if any(pattern in line for pattern in skip_patterns):
-            continue
-        # 找到正文开始（包含实际内容而非链接）
-        if line.strip() and not line.startswith('*') and not line.startswith('['):
-            content_start = i
-            break
-
-    # 从正文开始位置提取
-    if content_start > 0:
-        text = '\n'.join(lines[content_start:])
+    if len(paragraphs) <= 2:
+        # 如果只有2段以内，直接返回
+        result = ' '.join(paragraphs)
     else:
-        text = lines[0] if lines else ""
+        # 提取首段 + 尾段
+        first_part = paragraphs[0]
+        last_parts = ' '.join(paragraphs[-2:])  # 取最后两段
+        result = f"{first_part} ... {last_parts}"
 
     # 限制长度
-    if len(text) > max_length:
-        text = text[:max_length].rsplit(' ', 1)[0] + "..."
+    if len(result) > max_length:
+        # 智能截断：保留首段，尽可能多地保留尾段
+        first_len = len(paragraphs[0])
+        if first_len >= max_length:
+            result = paragraphs[0][:max_length].rsplit(' ', 1)[0] + "..."
+        else:
+            remaining = max_length - first_len - 4  # 4 for " ... "
+            if remaining > 50:
+                last_part = ' '.join(paragraphs[-2:])[:remaining].rsplit(' ', 1)[0]
+                result = f"{paragraphs[0]} ... {last_part}..."
+            else:
+                result = result[:max_length].rsplit(' ', 1)[0] + "..."
 
-    return text
+    return result.strip()
 
 
 def compute_content_hash(text: str) -> str:

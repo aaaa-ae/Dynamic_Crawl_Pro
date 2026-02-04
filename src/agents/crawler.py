@@ -1,11 +1,13 @@
 """
 CrawlerAgent - 爬虫 Agent
 负责使用 AsyncWebCrawler 异步爬取页面，带重试和指数退避
+使用 trafilatura 提取干净的正文内容
 """
 
 import asyncio
 from typing import Any, Dict, Optional
 from crawl4ai import AsyncWebCrawler
+import trafilatura
 from loguru import logger
 from tenacity import (
     retry,
@@ -118,10 +120,27 @@ class CrawlerAgent(BaseAgent):
             else:
                 markdown_text = str(markdown_obj)
 
+            # 使用 trafilatura 提取干净的正文内容
+            clean_content = trafilatura.extract(
+                result.html,
+                include_comments=False,
+                include_tables=True,
+                no_fallback=False,
+                output_format='txt',  # 返回纯文本（修复：使用 'txt'）
+            )
+
+            # 如果 trafilatura 提取失败，使用 markdown 作为备选
+            if not clean_content:
+                logger.debug(f"[{self.name}] trafilatura extraction failed for {url}, using markdown fallback")
+                clean_content = markdown_text
+            else:
+                logger.info(f"[{self.name}] trafilatura extracted {len(clean_content)} chars from {url}")
+
             return {
                 "success": True,
                 "html": result.html,
                 "markdown": markdown_text,
+                "clean_content": clean_content,  # 干净的正文（trafilatura提取）
                 "title": result.metadata.get("title", ""),
                 "status_code": result.status_code,
                 "url": url,
@@ -185,6 +204,7 @@ class CrawlerAgent(BaseAgent):
                     url=url,
                     html=crawl_result["html"],
                     markdown=crawl_result["markdown"],
+                    clean_content=crawl_result.get("clean_content", ""),  # 存储干净的正文
                     title=crawl_result["title"],
                     status_code=crawl_result["status_code"],
                 )

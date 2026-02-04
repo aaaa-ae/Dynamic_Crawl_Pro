@@ -28,6 +28,8 @@ class PageRecord:
     decision: str = "pending"
     priority: str = "medium"
     reasons: str = ""
+    relevance_score: float = 0.0  # LLM 评分
+    expand: bool = False  # 是否扩展链接
     main_content: str = ""  # 完整的正文内容
 
     def to_dict(self) -> Dict[str, Any]:
@@ -50,8 +52,9 @@ class CrawledPage:
     url: str
     html: str
     markdown: str
-    title: str
-    status_code: int
+    clean_content: str = ""  # trafilatura 提取的干净正文
+    title: str = ""
+    status_code: int = 0
     error: Optional[str] = None
     timestamp: Optional[str] = None
 
@@ -96,7 +99,8 @@ class DataManager:
         return hashlib.md5(url.encode('utf-8')).hexdigest()
 
     def store_page(self, url: str, html: str, markdown: str,
-                   title: str, status_code: int, error: str = None) -> str:
+                   title: str, status_code: int, clean_content: str = "",
+                   error: str = None) -> str:
         """
         存储爬取的页面数据
 
@@ -106,6 +110,7 @@ class DataManager:
             markdown: Markdown 内容
             title: 页面标题
             status_code: HTTP 状态码
+            clean_content: trafilatura 提取的干净正文
             error: 错误信息（如果有）
 
         Returns:
@@ -119,6 +124,7 @@ class DataManager:
             url=url,
             html=html,
             markdown=markdown,
+            clean_content=clean_content or "",  # trafilatura 提取的干净正文
             title=title,
             status_code=status_code,
             error=error,

@@ -1,0 +1,204 @@
+{
+  "input_file": "/home/guoziyang/AIgorithm_Agent/src/preparation/parser/tmp/MinerU_markdown_1.导言_pages.json",
+  "total_pages": 18,
+  "should_optimize_count": 13,
+  "teaching_chain": "马克思主义基本原理概论 → 马克思主义基本原理概论 → 第一讲 导言 → 恩格斯 → 一、什么是马克思主义 → 马克思主义与工人运动相结合",
+  "decisions": [
+    {
+      "slide_number": 0,
+      "title": "马克思主义基本原理概论",
+      "should_optimize": false,
+      "reason": "封面页",
+      "suggested_keywords": [],
+      "optimization_strategy": ""
+    },
+    {
+      "slide_number": 1,
+      "title": "马克思主义基本原理概论",
+      "should_optimize": false,
+      "reason": "无内容",
+      "suggested_keywords": [],
+      "optimization_strategy": ""
+    },
+    {
+      "slide_number": 2,
+      "title": "第一讲 导言",
+      "should_optimize": true,
+      "reason": "可以引导学生思考马克思主义对当代社会的影响及其重要性",
+      "suggested_keywords": [
+        "马克思主义",
+        "社会影响",
+        "价值观"
+      ],
+      "optimization_strategy": "在介绍马克思主义的影响时，强调其在当代中国社会发展中的指导作用，鼓励学生思考如何将马克思主义应用于实际生活中。"
+    },
+    {
+      "slide_number": 3,
+      "title": "恩格斯",
+      "should_optimize": true,
+      "reason": "可以引入对社会责任和历史人物的思考",
+      "suggested_keywords": [
+        "社会责任",
+        "历史人物",
+        "家国情怀"
+      ],
+      "optimization_strategy": "在介绍恩格斯的生平时，强调他对工人阶级的关心和社会责任感，鼓励学生学习这种关心弱势群体的精神。"
+    },
+    {
+      "slide_number": 4,
+      "title": "什么是马克思主义",
+      "should_optimize": true,
+      "reason": "涉及解放与社会公正的主题",
+      "suggested_keywords": [
+        "解放",
+        "社会公正",
+        "人类"
+      ],
+      "optimization_strategy": "在阐述马克思主义的核心理念时，结合当代中国对社会公正的追求，鼓励学生思考如何在生活中践行这些理念。"
+    },
+    {
+      "slide_number": 5,
+      "title": "马克思主义与工人运动相结合",
+      "should_optimize": true,
+      "reason": "可以引发对当代劳动者权益的思考",
+      "suggested_keywords": [
+        "工人运动",
+        "劳动者权益",
+        "社会进步"
+      ],
+      "optimization_strategy": "在讨论工人运动时，引入当代劳动者权益保护的相关案例，鼓励学生关注社会进步与工人权益的关系。"
+    },
+    {
+      "slide_number": 6,
+      "title": "马克思研究的核心问题",
+      "should_optimize": false,
+      "reason": "纯技术性内容",
+      "suggested_keywords": [],
+      "optimization_strategy": ""
+    },
+    {
+      "slide_number": 7,
+      "title": "无产阶级能否获得解放",
+      "should_optimize": true,
+      "reason": "涉及社会解放与历史发展的思考",
+      "suggested_keywords": [
+        "社会解放",
+        "历史发展",
+        "社会责任"
+      ],
+      "optimization_strategy": "在讨论无产阶级解放的必然性时，结合当代中国的社会发展，鼓励学生思考如何参与社会变革。"
+    },
+    {
+      "slide_number": 8,
+      "title": "无产阶级如何获得解放",
+      "should_optimize": true,
+      "reason": "可以引导学生思考社会运动与个人责任",
+      "suggested_keywords": [
+        "社会运动",
+        "个人责任",
+        "家国情怀"
+      ],
+      "optimization_strategy": "在讨论无产阶级解放的路径时，强调个人在社会运动中的作用，鼓励学生积极参与社会事务。"
+    },
+    {
+      "slide_number": 9,
+      "title": "马克思主义的产生和发展",
+      "should_optimize": false,
+      "reason": "内容较为技术性",
+      "suggested_keywords": [],
+      "optimization_strategy": ""
+    },
+    {
+      "slide_number": 10,
+      "title": "马克思主义产生和发展的时代背景",
+      "should_optimize": true,
+      "reason": "涉及历史背景与社会变革",
+      "suggested_keywords": [
+        "历史背景",
+        "社会变革",
+        "时代责任"
+      ],
+      "optimization_strategy": "在讨论时代背景时，引入当代社会变革的实例，鼓励学生思考历史与现实的联系。"
+    },
+    {
+      "slide_number": 11,
+      "title": "马克思主义理论体系的基本内容",
+      "should_optimize": false,
+      "reason": "纯技术性内容",
+      "suggested_keywords": [],
+      "optimization_strategy": ""
+    },
+    {
+      "slide_number": 12,
+      "title": "马克思主义对当代社会的影响",
+      "should_optimize": true,
+      "reason": "直接涉及当代社会与马克思主义的关系",
+      "suggested_keywords": [
+        "当代社会",
+        "影响",
+        "社会责任"
+      ],
+      "optimization_strategy": "在分析影响时，结合当代中国的社会问题，引导学生思考如何运用马克思主义解决现实问题。"
+    },
+    {
+      "slide_number": 13,
+      "title": "过去的影响",
+      "should_optimize": true,
+      "reason": "涉及历史与现实的联系",
+      "suggested_keywords": [
+        "历史影响",
+        "现实联系",
+        "社会责任"
+      ],
+      "optimization_strategy": "在讨论历史影响时，强调其对当代社会的启示，鼓励学生思考如何从历史中汲取经验。"
+    },
+    {
+      "slide_number": 14,
+      "title": "马克思主义在非西方社会取得革命成功的原因",
+      "should_optimize": true,
+      "reason": "可以引导学生思考社会变革的动力",
+      "suggested_keywords": [
+        "社会变革",
+        "动力",
+        "理想主义"
+      ],
+      "optimization_strategy": "在分析原因时，强调理想主义者的作用，鼓励学生树立理想信念，积极参与社会变革。"
+    },
+    {
+      "slide_number": 15,
+      "title": "我们为什么还要学习马克思主义",
+      "should_optimize": true,
+      "reason": "直接与当代社会问题相关",
+      "suggested_keywords": [
+        "学习意义",
+        "社会问题",
+        "家国情怀"
+      ],
+      "optimization_strategy": "在讨论学习意义时，结合当代社会问题，引导学生思考如何将马克思主义应用于解决实际问题。"
+    },
+    {
+      "slide_number": 16,
+      "title": "我们要从马克思主义哪里学习什么",
+      "should_optimize": true,
+      "reason": "涉及价值观与社会责任",
+      "suggested_keywords": [
+        "价值观",
+        "社会责任",
+        "理想追求"
+      ],
+      "optimization_strategy": "在总结学习内容时，强调马克思主义对个人价值观和社会责任的塑造，鼓励学生树立正确的价值观。"
+    },
+    {
+      "slide_number": 17,
+      "title": "如何学习好马克思主义",
+      "should_optimize": true,
+      "reason": "涉及学习方法与社会责任",
+      "suggested_keywords": [
+        "学习方法",
+        "社会责任",
+        "理想信念"
+      ],
+      "optimization_strategy": "在讨论学习方法时，强调学习马克思主义的社会责任感，鼓励学生将理论与实践结合。"
+    }
+  ]
+}

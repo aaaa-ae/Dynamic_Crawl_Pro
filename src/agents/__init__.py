@@ -24,4 +24,12 @@ __all__ = [
     # Quality Gate
     "QualityGateAgent",
     "create_quality_gate_agent",
+
+    # Semantic Aligner (NEW)
+    "SemanticAlignAgent",
+    "create_semantic_align_agent",
+
+    # Teaching Rewriter (NEW)
+    "TeachingRewriterAgent",
+    "create_teaching_rewriter_agent",
 ]

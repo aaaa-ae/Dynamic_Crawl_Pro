@@ -1,0 +1,88 @@
+{
+  "preset_urls": {
+    "马克思主义": {
+      "name": "马克思主义与政治类资源",
+      "urls": [
+        "http://cpc.people.com.cn/",
+        "https://www.qstheory.cn/",
+        "http://www.xinhuanet.com/politics/",
+        "https://www.gmw.cn/",
+        "https://www.cssn.cn/",
+        "https://www.china.com.cn/"
+      ],
+      "status": "approved",
+      "last_updated": "2026-02-03",
+      "maintainer": "教学平台团队",
+      "description": "马克思主义理论、时事政治、社会新闻资源，包含理论阐释、时事分析、社会现象评论等"
+    },
+    "算法": {
+      "name": "算法类资源",
+      "urls": [
+        "https://www.infoq.cn/topic/architecture",
+        "https://www.infoq.com/architecture-design/",
+        "https://blog.cloudflare.com/",
+        "http://highscalability.com/",
+        "https://tech.meituan.com/",
+        "https://engineering.atspotify.com/blog/",
+        "https://netflixtechblog.com/",
+        "https://tech.uber.com/",
+        "https://engineering.fb.com/",
+        "https://spectrum.ieee.org/computing",
+        "https://spectrum.ieee.org/artificial-intelligence"
+      ],
+      "status": "approved",
+      "last_updated": "2026-02-03",
+      "maintainer": "教学平台团队",
+      "description": "面向算法课程的现实工程案例与技术事件来源，强调决策、优化、调度与系统权衡，而非刷题或教程"
+    },
+    "大学物理": {
+      "name": "物理类资源",
+      "urls": [
+        "https://www.physics.org/news/",
+        "https://www.science.org/news/physics/",
+        "https://www.feynmanlectures.caltech.edu/",
+        "https://phys.org/news/",
+        "https://physicsworld.com/"
+      ],
+      "status": "approved",
+      "last_updated": "2026-02-03",
+      "maintainer": "教学平台团队",
+      "description": "物理学新闻和教学资源"
+    },
+    "高等数学": {
+      "name": "数学类资源",
+      "urls": [
+        "https://www.ams.org/news",
+        "https://plus.maths.org/",
+        "https://www.quantamagazine.org/",
+        "https://www.math.uni-bielefeld.de/",
+        "https://www.springer.com/gp/mathematics"
+      ],
+      "status": "approved",
+      "last_updated": "2026-02-03",
+      "maintainer": "教学平台团队",
+      "description": "数学研究和教学资源"
+    },
+    "机器学习": {
+      "name": "机器学习类资源",
+      "urls": [
+        "https://www.kaggle.com/blog/",
+        "https://towardsdatascience.com/",
+        "https://machinelearningmastery.com/blog/",
+        "https://www.deeplearning.ai/",
+        "https://ai.googleblog.com/"
+      ],
+      "status": "approved",
+      "last_updated": "2026-02-03",
+      "maintainer": "教学平台团队",
+      "description": "机器学习和AI应用案例"
+    }
+  },
+  "meta": {
+    "version": "1.0",
+    "last_updated": "2026-02-03",
+    "total_types": 4,
+    "pending_review": 0,
+    "notes": "approved=人工审核，pending=DuckDuckGo自动搜索待审核"
+  }
+}
