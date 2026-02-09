@@ -1,0 +1,84 @@
+{
+  "test_keywords": [
+    "马克思主义",
+    "算法",
+    "machine learning"
+  ],
+  "total_discovered": 8,
+  "educational_urls": 2,
+  "recommended_count": 2,
+  "all_urls": [
+    {
+      "url": "https://en.wikipedia.org/wiki/Machine_learning",
+      "type": "official",
+      "source": "Wikipedia",
+      "title": "Machine learning",
+      "priority_score": 15
+    },
+    {
+      "url": "https://en.wikipedia.org/wiki/Machine_learning",
+      "type": "primary",
+      "source": "AbstractURL",
+      "title": "Machine learning is a field of study in artificial intelligence concerned with the development and s",
+      "priority_score": 13
+    },
+    {
+      "url": "https://duckduckgo.com/c/Machine_learning",
+      "type": "related",
+      "source": "RelatedTopics",
+      "title": "Machine learning Category",
+      "priority_score": 0
+    },
+    {
+      "url": "https://duckduckgo.com/Deep_learning",
+      "type": "related",
+      "source": "RelatedTopics",
+      "title": "Deep learning — branch of ML concerned with artificial neural network s.",
+      "priority_score": 0
+    },
+    {
+      "url": "https://duckduckgo.com/Outline_of_machine_learning",
+      "type": "related",
+      "source": "RelatedTopics",
+      "title": "Outline of machine learning - The following outline is provided as an overview of, and topical guide",
+      "priority_score": 0
+    },
+    {
+      "url": "https://duckduckgo.com/c/Definition",
+      "type": "related",
+      "source": "RelatedTopics",
+      "title": "Definition",
+      "priority_score": 0
+    },
+    {
+      "url": "https://duckduckgo.com/c/Cybernetics",
+      "type": "related",
+      "source": "RelatedTopics",
+      "title": "Cybernetics",
+      "priority_score": 0
+    },
+    {
+      "url": "https://duckduckgo.com/c/Learning",
+      "type": "related",
+      "source": "RelatedTopics",
+      "title": "Learning",
+      "priority_score": 0
+    }
+  ],
+  "recommended_urls": [
+    {
+      "url": "https://en.wikipedia.org/wiki/Machine_learning",
+      "type": "official",
+      "source": "Wikipedia",
+      "title": "Machine learning",
+      "priority_score": 15
+    },
+    {
+      "url": "https://en.wikipedia.org/wiki/Machine_learning",
+      "type": "primary",
+      "source": "AbstractURL",
+      "title": "Machine learning is a field of study in artificial intelligence concerned with the development and s",
+      "priority_score": 13
+    }
+  ]
+}
