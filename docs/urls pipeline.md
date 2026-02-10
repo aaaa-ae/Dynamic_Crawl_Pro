@@ -3,7 +3,7 @@
 系统目标是实现以下功能：
 
 1. 对于已知主题，使用**人工维护的种子 URL**进行爬取（例如：`马克思主义`、`高等数学`）。
-2. 对于**没有种子 URL 的新主题**，通过**Web 搜索自动发现相关 URL**（比如：`机器学习`、`深度学习`等）。
+2. 对于**没有种子 URL 的新主题**（冷启动问题），通过**Web 搜索自动发现相关 URL**（比如：`机器学习`、`深度学习`等）。
 
 ------
 
@@ -21,6 +21,20 @@
 2. **没有种子的主题**：如果 `preset_seed_urls.json` 中没有相关种子 URL，系统将通过 Web 搜索自动生成种子。
    - 使用 **web search工具**（**Brave Search API** 、**DuckDuckGo**、**Wikipedia API **等） 来搜索与该主题相关的**权威网站**。
    - 例如：对“机器学习”主题，系统会查询：“xxxxx（query？）”，并从中提取出相关 URL（评估排序？）。
+
+```bash
+current sources:
+  1、Wikipedia External Links（百科外链）
+  2、GDELT Realtime Articles（全球新闻事件库）
+  3、RSS Feeds（关键词过滤的订阅源）
+  
+未使用任何搜索api。
+```
+| 方法                       | 能得到的主要 URL 类型          | 教学系统中的角色  |
+| ------------------------ | ---------------------- | --------- |
+| Wikipedia External Links | Anchor / 部分 Evidence   | 背景知识、概念锚点 |
+| GDELT Realtime           | Evidence / 冷启动入口       | 现实事件触发源   |
+| RSS Feeds                | Event Seeds / Evidence | 持续更新机制    |
 
 ### **3. 自建索引持续增强（种子库扩展）**
 

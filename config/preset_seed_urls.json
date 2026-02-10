@@ -81,7 +81,7 @@
   "meta": {
     "version": "1.0",
     "last_updated": "2026-02-03",
-    "total_types": 4,
+    "total_types": 5,
     "pending_review": 0,
     "notes": "approved=人工审核，pending=web search自动搜索待审核"
   }

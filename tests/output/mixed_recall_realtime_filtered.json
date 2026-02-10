@@ -1,0 +1,991 @@
+{
+  "results": [
+    {
+      "keyword": "马克思主义",
+      "language": "zh",
+      "event_seed_count": 6,
+      "anchor_seed_count": 20,
+      "evidence_count": 22,
+      "event_seeds": [
+        {
+          "url": "https://www.taipeitimes.com/news",
+          "score": 10,
+          "domain": "www.taipeitimes.com",
+          "root_domain": "taipeitimes.com",
+          "reasons": [
+            "newsroom_entrance"
+          ]
+        },
+        {
+          "url": "https://news.ltn.com.tw/news",
+          "score": 10,
+          "domain": "news.ltn.com.tw",
+          "root_domain": "ltn.com.tw",
+          "reasons": [
+            "newsroom_entrance"
+          ]
+        },
+        {
+          "url": "https://keyt.com/news",
+          "score": 10,
+          "domain": "keyt.com",
+          "root_domain": "keyt.com",
+          "reasons": [
+            "newsroom_entrance"
+          ]
+        },
+        {
+          "url": "https://abc17news.com/news",
+          "score": 10,
+          "domain": "abc17news.com",
+          "root_domain": "abc17news.com",
+          "reasons": [
+            "newsroom_entrance"
+          ]
+        },
+        {
+          "url": "https://localnews8.com/news",
+          "score": 10,
+          "domain": "localnews8.com",
+          "root_domain": "localnews8.com",
+          "reasons": [
+            "newsroom_entrance"
+          ]
+        },
+        {
+          "url": "https://kesq.com/news",
+          "score": 10,
+          "domain": "kesq.com",
+          "root_domain": "kesq.com",
+          "reasons": [
+            "newsroom_entrance"
+          ]
+        }
+      ],
+      "anchor_seeds": [
+        {
+          "url": "https://www.marxists.org/archive/marx/works/1877/anti-duhring/introduction.htm",
+          "score": 9,
+          "domain": "www.marxists.org",
+          "root_domain": "marxists.org",
+          "reasons": [
+            "content_page",
+            "anchor_like"
+          ]
+        },
+        {
+          "url": "https://www.taipeitimes.com/News/editorials/archives/2026/02/09",
+          "score": 7,
+          "domain": "www.taipeitimes.com",
+          "root_domain": "taipeitimes.com",
+          "reasons": [
+            "content_page",
+            "anchor_from_content_or_kb"
+          ]
+        },
+        {
+          "url": "https://www.taipeitimes.com/News/editorials/archives/2026/02",
+          "score": 7,
+          "domain": "www.taipeitimes.com",
+          "root_domain": "taipeitimes.com",
+          "reasons": [
+            "content_page",
+            "anchor_from_content_or_kb"
+          ]
+        },
+        {
+          "url": "https://www.taipeitimes.com/News/editorials/archives/2026/02/05",
+          "score": 7,
+          "domain": "www.taipeitimes.com",
+          "root_domain": "taipeitimes.com",
+          "reasons": [
+            "content_page",
+            "anchor_from_content_or_kb"
+          ]
+        },
+        {
+          "url": "https://www.taipeitimes.com/News/taiwan/archives/2026/02/03",
+          "score": 7,
+          "domain": "www.taipeitimes.com",
+          "root_domain": "taipeitimes.com",
+          "reasons": [
+            "content_page",
+            "anchor_from_content_or_kb"
+          ]
+        },
+        {
+          "url": "https://www.taipeitimes.com/News/taiwan/archives/2026/02",
+          "score": 7,
+          "domain": "www.taipeitimes.com",
+          "root_domain": "taipeitimes.com",
+          "reasons": [
+            "content_page",
+            "anchor_from_content_or_kb"
+          ]
+        },
+        {
+          "url": "http://www.britannica.com/EBchecked/topic/551385/social-science/38930/Marxist-influences",
+          "score": 7,
+          "domain": "www.britannica.com",
+          "root_domain": "britannica.com",
+          "reasons": [
+            "content_page",
+            "anchor_from_content_or_kb"
+          ]
+        },
+        {
+          "url": "https://www.marxists.org/archive/marx/works/1859/critique-pol-economy/index.htm",
+          "score": 7,
+          "domain": "www.marxists.org",
+          "root_domain": "marxists.org",
+          "reasons": [
+            "content_page",
+            "anchor_from_content_or_kb"
+          ]
+        },
+        {
+          "url": "https://www.marxists.org/archive/marx/works/1845/german-ideology",
+          "score": 7,
+          "domain": "www.marxists.org",
+          "root_domain": "marxists.org",
+          "reasons": [
+            "content_page",
+            "anchor_from_content_or_kb"
+          ]
+        },
+        {
+          "url": "https://www.marxists.org/archive/marx/works/1859/critique-pol-economy/preface.htm",
+          "score": 7,
+          "domain": "www.marxists.org",
+          "root_domain": "marxists.org",
+          "reasons": [
+            "content_page",
+            "anchor_from_content_or_kb"
+          ]
+        },
+        {
+          "url": "https://www.marxists.org/archive/marx/works/1893/letters/93_07_14.htm",
+          "score": 7,
+          "domain": "www.marxists.org",
+          "root_domain": "marxists.org",
+          "reasons": [
+            "content_page",
+            "anchor_from_content_or_kb"
+          ]
+        },
+        {
+          "url": "https://www.marxists.org/archive/marx/works/1845/german-ideology/ch01b.htm",
+          "score": 7,
+          "domain": "www.marxists.org",
+          "root_domain": "marxists.org",
+          "reasons": [
+            "content_page",
+            "anchor_from_content_or_kb"
+          ]
+        },
+        {
+          "url": "http://eurodos.home.xs4all.nl/docu/cpsu-texts/cpsu86-21.htm",
+          "score": 7,
+          "domain": "eurodos.home.xs4all.nl",
+          "root_domain": "xs4all.nl",
+          "reasons": [
+            "content_page",
+            "anchor_from_content_or_kb"
+          ]
+        },
+        {
+          "url": "https://marxmyths.org/joseph-mccarney/article.htm",
+          "score": 7,
+          "domain": "marxmyths.org",
+          "root_domain": "marxmyths.org",
+          "reasons": [
+            "content_page",
+            "anchor_from_content_or_kb"
+          ]
+        },
+        {
+          "url": "https://www.marxists.org/history/ussr/events/revolution/index.htm",
+          "score": 7,
+          "domain": "www.marxists.org",
+          "root_domain": "marxists.org",
+          "reasons": [
+            "content_page",
+            "anchor_from_content_or_kb"
+          ]
+        },
+        {
+          "url": "http://www.historicaleye.com/Munich1.html",
+          "score": 7,
+          "domain": "www.historicaleye.com",
+          "root_domain": "historicaleye.com",
+          "reasons": [
+            "content_page",
+            "anchor_from_content_or_kb"
+          ]
+        },
+        {
+          "url": "http://www.ibiblio.org/expo/soviet.exhibit/collect.html",
+          "score": 7,
+          "domain": "www.ibiblio.org",
+          "root_domain": "ibiblio.org",
+          "reasons": [
+            "content_page",
+            "anchor_from_content_or_kb"
+          ]
+        },
+        {
+          "url": "https://www.marxists.org/history/international/comintern/sino-soviet-split/index.htm",
+          "score": 7,
+          "domain": "www.marxists.org",
+          "root_domain": "marxists.org",
+          "reasons": [
+            "content_page",
+            "anchor_from_content_or_kb"
+          ]
+        },
+        {
+          "url": "http://www.marxist.com/History-old/yugoslavia48.html",
+          "score": 7,
+          "domain": "www.marxist.com",
+          "root_domain": "marxist.com",
+          "reasons": [
+            "content_page",
+            "anchor_from_content_or_kb"
+          ]
+        },
+        {
+          "url": "https://whatech.com/asia-pacific-news/1009946-sipzz-opens-second-flagship-store-at-paradigm-mall-johor-bahru.html",
+          "score": 7,
+          "domain": "whatech.com",
+          "root_domain": "whatech.com",
+          "reasons": [
+            "content_page",
+            "anchor_from_content_or_kb"
+          ]
+        }
+      ],
+      "evidence_pages": [
+        {
+          "url": "https://www.taipeitimes.com/News/editorials/archives/2026/02/09/2003851996",
+          "score": 2,
+          "domain": "www.taipeitimes.com",
+          "root_domain": "taipeitimes.com",
+          "reasons": [
+            "detail_article"
+          ]
+        },
+        {
+          "url": "https://www.taipeitimes.com/News/editorials/archives/2026/02/05/2003851785",
+          "score": 2,
+          "domain": "www.taipeitimes.com",
+          "root_domain": "taipeitimes.com",
+          "reasons": [
+            "detail_article"
+          ]
+        },
+        {
+          "url": "https://keyt.com/news/national-world/cnn-world/2026/02/03/a-harry-potter-villain-is-now-an-unlikely-new-year-mascot-in-china",
+          "score": 2,
+          "domain": "keyt.com",
+          "root_domain": "keyt.com",
+          "reasons": [
+            "detail_article"
+          ]
+        },
+        {
+          "url": "https://abc17news.com/news/national-world/cnn-world/2026/02/03/a-harry-potter-villain-is-now-an-unlikely-new-year-mascot-in-china",
+          "score": 2,
+          "domain": "abc17news.com",
+          "root_domain": "abc17news.com",
+          "reasons": [
+            "detail_article"
+          ]
+        },
+        {
+          "url": "https://localnews8.com/news/national-world/cnn-world/2026/02/03/a-harry-potter-villain-is-now-an-unlikely-new-year-mascot-in-china",
+          "score": 2,
+          "domain": "localnews8.com",
+          "root_domain": "localnews8.com",
+          "reasons": [
+            "detail_article"
+          ]
+        },
+        {
+          "url": "https://kesq.com/news/national-world/cnn-world/2026/02/03/a-harry-potter-villain-is-now-an-unlikely-new-year-mascot-in-china",
+          "score": 2,
+          "domain": "kesq.com",
+          "root_domain": "kesq.com",
+          "reasons": [
+            "detail_article"
+          ]
+        },
+        {
+          "url": "https://www.taipeitimes.com/News/taiwan/archives/2026/02/03/2003851684",
+          "score": 2,
+          "domain": "www.taipeitimes.com",
+          "root_domain": "taipeitimes.com",
+          "reasons": [
+            "detail_article"
+          ]
+        },
+        {
+          "url": "https://keyt.com/news/national-world/cnn-world/2026/02/03",
+          "score": 2,
+          "domain": "keyt.com",
+          "root_domain": "keyt.com",
+          "reasons": [
+            "detail_article"
+          ]
+        },
+        {
+          "url": "https://keyt.com/news/national-world/cnn-world/2026/02",
+          "score": 2,
+          "domain": "keyt.com",
+          "root_domain": "keyt.com",
+          "reasons": [
+            "detail_article"
+          ]
+        },
+        {
+          "url": "https://abc17news.com/news/national-world/cnn-world/2026/02/03",
+          "score": 2,
+          "domain": "abc17news.com",
+          "root_domain": "abc17news.com",
+          "reasons": [
+            "detail_article"
+          ]
+        },
+        {
+          "url": "https://abc17news.com/news/national-world/cnn-world/2026/02",
+          "score": 2,
+          "domain": "abc17news.com",
+          "root_domain": "abc17news.com",
+          "reasons": [
+            "detail_article"
+          ]
+        },
+        {
+          "url": "https://localnews8.com/news/national-world/cnn-world/2026/02/03",
+          "score": 2,
+          "domain": "localnews8.com",
+          "root_domain": "localnews8.com",
+          "reasons": [
+            "detail_article"
+          ]
+        },
+        {
+          "url": "https://localnews8.com/news/national-world/cnn-world/2026/02",
+          "score": 2,
+          "domain": "localnews8.com",
+          "root_domain": "localnews8.com",
+          "reasons": [
+            "detail_article"
+          ]
+        },
+        {
+          "url": "https://kesq.com/news/national-world/cnn-world/2026/02/03",
+          "score": 2,
+          "domain": "kesq.com",
+          "root_domain": "kesq.com",
+          "reasons": [
+            "detail_article"
+          ]
+        },
+        {
+          "url": "https://kesq.com/news/national-world/cnn-world/2026/02",
+          "score": 2,
+          "domain": "kesq.com",
+          "root_domain": "kesq.com",
+          "reasons": [
+            "detail_article"
+          ]
+        },
+        {
+          "url": "https://news.ltn.com.tw/news/focus/breakingnews/5336301",
+          "score": 2,
+          "domain": "news.ltn.com.tw",
+          "root_domain": "ltn.com.tw",
+          "reasons": [
+            "detail_article"
+          ]
+        },
+        {
+          "url": "https://news.ltn.com.tw/news/focus/breakingnews",
+          "score": 2,
+          "domain": "news.ltn.com.tw",
+          "root_domain": "ltn.com.tw",
+          "reasons": [
+            "detail_article"
+          ]
+        },
+        {
+          "url": "https://news.ltn.com.tw/news/focus",
+          "score": 2,
+          "domain": "news.ltn.com.tw",
+          "root_domain": "ltn.com.tw",
+          "reasons": [
+            "detail_article"
+          ]
+        },
+        {
+          "url": "https://globalvoices.org/2026/02/04/why-japans-upcoming-lower-house-elections-feel-like-a-race-to-the-bottom",
+          "score": 2,
+          "domain": "globalvoices.org",
+          "root_domain": "globalvoices.org",
+          "reasons": [
+            "detail_article"
+          ]
+        },
+        {
+          "url": "https://edition.cnn.com/2026/02/04/world/draco-malfoy-china-new-year-mascot-intl-hnk",
+          "score": 2,
+          "domain": "edition.cnn.com",
+          "root_domain": "cnn.com",
+          "reasons": [
+            "detail_article"
+          ]
+        }
+      ]
+    },
+    {
+      "keyword": "算法",
+      "language": "zh",
+      "event_seed_count": 7,
+      "anchor_seed_count": 3,
+      "evidence_count": 0,
+      "event_seeds": [
+        {
+          "url": "https://spectrum.ieee.org/feeds/topic/the-institute.rss",
+          "score": 38,
+          "domain": "spectrum.ieee.org",
+          "root_domain": "ieee.org",
+          "reasons": [
+            "trusted_domain",
+            "feed_url"
+          ]
+        },
+        {
+          "url": "https://spectrum.ieee.org/category/the-institute",
+          "score": 27,
+          "domain": "spectrum.ieee.org",
+          "root_domain": "ieee.org",
+          "reasons": [
+            "trusted_domain",
+            "taxonomy_listing",
+            "derived_from_feed"
+          ]
+        },
+        {
+          "url": "https://spectrum.ieee.org/topics/the-institute",
+          "score": 27,
+          "domain": "spectrum.ieee.org",
+          "root_domain": "ieee.org",
+          "reasons": [
+            "trusted_domain",
+            "taxonomy_listing",
+            "derived_from_feed"
+          ]
+        },
+        {
+          "url": "https://spectrum.ieee.org/tag/the-institute",
+          "score": 27,
+          "domain": "spectrum.ieee.org",
+          "root_domain": "ieee.org",
+          "reasons": [
+            "trusted_domain",
+            "taxonomy_listing",
+            "derived_from_feed"
+          ]
+        },
+        {
+          "url": "https://spectrum.ieee.org/tags/the-institute",
+          "score": 27,
+          "domain": "spectrum.ieee.org",
+          "root_domain": "ieee.org",
+          "reasons": [
+            "trusted_domain",
+            "taxonomy_listing",
+            "derived_from_feed"
+          ]
+        },
+        {
+          "url": "https://spectrum.ieee.org/topic/the-institute",
+          "score": 27,
+          "domain": "spectrum.ieee.org",
+          "root_domain": "ieee.org",
+          "reasons": [
+            "trusted_domain",
+            "taxonomy_listing",
+            "derived_from_feed"
+          ]
+        },
+        {
+          "url": "https://spectrum.ieee.org/categories/the-institute",
+          "score": 27,
+          "domain": "spectrum.ieee.org",
+          "root_domain": "ieee.org",
+          "reasons": [
+            "trusted_domain",
+            "taxonomy_listing",
+            "derived_from_feed"
+          ]
+        }
+      ],
+      "anchor_seeds": [
+        {
+          "url": "http://www.guardian.co.uk/technology/2012/dec/10/ada-lovelace-honoured-google-doodle",
+          "score": 7,
+          "domain": "www.guardian.co.uk",
+          "root_domain": "guardian.co.uk",
+          "reasons": [
+            "content_page",
+            "anchor_from_content_or_kb"
+          ]
+        },
+        {
+          "url": "http://book.51cto.com/art/201303/383482.htm",
+          "score": 7,
+          "domain": "book.51cto.com",
+          "root_domain": "51cto.com",
+          "reasons": [
+            "content_page",
+            "anchor_from_content_or_kb"
+          ]
+        },
+        {
+          "url": "http://www.zaidian.com/gaozhongjiaoan/648112.html",
+          "score": 7,
+          "domain": "www.zaidian.com",
+          "root_domain": "zaidian.com",
+          "reasons": [
+            "content_page",
+            "anchor_from_content_or_kb"
+          ]
+        }
+      ],
+      "evidence_pages": []
+    },
+    {
+      "keyword": "machine learning",
+      "language": "en",
+      "event_seed_count": 6,
+      "anchor_seed_count": 17,
+      "evidence_count": 30,
+      "event_seeds": [
+        {
+          "url": "https://www.ibm.com/topics/unsupervised-learning",
+          "score": 16,
+          "domain": "www.ibm.com",
+          "root_domain": "ibm.com",
+          "reasons": [
+            "taxonomy_listing"
+          ]
+        },
+        {
+          "url": "https://www.ibm.com/think/topics/random-forest",
+          "score": 16,
+          "domain": "www.ibm.com",
+          "root_domain": "ibm.com",
+          "reasons": [
+            "taxonomy_listing"
+          ]
+        },
+        {
+          "url": "https://www.fnnews.com/news",
+          "score": 10,
+          "domain": "www.fnnews.com",
+          "root_domain": "fnnews.com",
+          "reasons": [
+            "newsroom_entrance"
+          ]
+        },
+        {
+          "url": "http://www.bruneinews.net/news",
+          "score": 10,
+          "domain": "www.bruneinews.net",
+          "root_domain": "bruneinews.net",
+          "reasons": [
+            "newsroom_entrance"
+          ]
+        },
+        {
+          "url": "https://seekingalpha.com/news",
+          "score": 10,
+          "domain": "seekingalpha.com",
+          "root_domain": "seekingalpha.com",
+          "reasons": [
+            "newsroom_entrance"
+          ]
+        },
+        {
+          "url": "https://openai.com/blog/ai-and-compute",
+          "score": 10,
+          "domain": "openai.com",
+          "root_domain": "openai.com",
+          "reasons": [
+            "newsroom_entrance"
+          ]
+        }
+      ],
+      "anchor_seeds": [
+        {
+          "url": "https://www.cs.cornell.edu/courses/cs4780/2022sp/notes/LectureNotes02.html",
+          "score": 19,
+          "domain": "www.cs.cornell.edu",
+          "root_domain": "cornell.edu",
+          "reasons": [
+            "trusted_domain",
+            "content_page",
+            "anchor_like",
+            "course_hint"
+          ]
+        },
+        {
+          "url": "http://cs.fit.edu/~mmahoney/compression/rationale.html",
+          "score": 15,
+          "domain": "cs.fit.edu",
+          "root_domain": "fit.edu",
+          "reasons": [
+            "trusted_domain",
+            "content_page",
+            "anchor_from_content_or_kb"
+          ]
+        },
+        {
+          "url": "https://www.era.lib.ed.ac.uk/bitstream/handle/1842/6656/Plotkin1972.pdf;sequence=1",
+          "score": 15,
+          "domain": "www.era.lib.ed.ac.uk",
+          "root_domain": "ed.ac.uk",
+          "reasons": [
+            "trusted_domain",
+            "content_page",
+            "anchor_from_content_or_kb"
+          ]
+        },
+        {
+          "url": "https://facultystaff.richmond.edu/~cstevens/301/Excel4.html",
+          "score": 15,
+          "domain": "facultystaff.richmond.edu",
+          "root_domain": "richmond.edu",
+          "reasons": [
+            "trusted_domain",
+            "content_page",
+            "anchor_from_content_or_kb"
+          ]
+        },
+        {
+          "url": "https://hazyresearch.github.io/snorkel/blog/ws_blog_post.html",
+          "score": 7,
+          "domain": "hazyresearch.github.io",
+          "root_domain": "github.io",
+          "reasons": [
+            "content_page",
+            "anchor_from_content_or_kb"
+          ]
+        },
+        {
+          "url": "https://blog.research.google/2023/05/differentially-private-clustering-for.html",
+          "score": 7,
+          "domain": "blog.research.google",
+          "root_domain": "research.google",
+          "reasons": [
+            "content_page",
+            "anchor_from_content_or_kb"
+          ]
+        },
+        {
+          "url": "http://ai.googleblog.com/2017/04/federated-learning-collaborative.html",
+          "score": 7,
+          "domain": "ai.googleblog.com",
+          "root_domain": "googleblog.com",
+          "reasons": [
+            "content_page",
+            "anchor_from_content_or_kb"
+          ]
+        },
+        {
+          "url": "http://techblog.netflix.com/2012/04/netflix-recommendations-beyond-5-stars.html",
+          "score": 7,
+          "domain": "techblog.netflix.com",
+          "root_domain": "netflix.com",
+          "reasons": [
+            "content_page",
+            "anchor_from_content_or_kb"
+          ]
+        },
+        {
+          "url": "https://www.kdnuggets.com/2018/07/why-machine-learning-project-fail.html",
+          "score": 7,
+          "domain": "www.kdnuggets.com",
+          "root_domain": "kdnuggets.com",
+          "reasons": [
+            "content_page",
+            "anchor_from_content_or_kb"
+          ]
+        },
+        {
+          "url": "https://scikit-learn.org/stable/modules/generated/sklearn.ensemble.RandomForestRegressor.html",
+          "score": 7,
+          "domain": "scikit-learn.org",
+          "root_domain": "scikit-learn.org",
+          "reasons": [
+            "content_page",
+            "anchor_from_content_or_kb"
+          ]
+        },
+        {
+          "url": "http://scikit-learn.org/stable/auto_examples/gaussian_process/plot_compare_gpr_krr.html",
+          "score": 7,
+          "domain": "scikit-learn.org",
+          "root_domain": "scikit-learn.org",
+          "reasons": [
+            "content_page",
+            "anchor_from_content_or_kb"
+          ]
+        },
+        {
+          "url": "https://finance.yahoo.com/personal-finance/insurance/article/best-car-insurance-for-seniors-153952455.html",
+          "score": 7,
+          "domain": "finance.yahoo.com",
+          "root_domain": "yahoo.com",
+          "reasons": [
+            "content_page",
+            "anchor_from_content_or_kb"
+          ]
+        },
+        {
+          "url": "http://www.js.xinhuanet.com/20260210/bc15a629c8864b82b0708c1af5c90eef/c.html",
+          "score": 7,
+          "domain": "www.js.xinhuanet.com",
+          "root_domain": "xinhuanet.com",
+          "reasons": [
+            "content_page",
+            "anchor_from_content_or_kb"
+          ]
+        },
+        {
+          "url": "https://news.china.com/socialgd/10000169/20260210/49240982.html",
+          "score": 7,
+          "domain": "news.china.com",
+          "root_domain": "china.com",
+          "reasons": [
+            "content_page",
+            "anchor_from_content_or_kb"
+          ]
+        },
+        {
+          "url": "https://blog.wenxuecity.com/myblog/80238/202602/6638.html",
+          "score": 7,
+          "domain": "blog.wenxuecity.com",
+          "root_domain": "wenxuecity.com",
+          "reasons": [
+            "content_page",
+            "anchor_from_content_or_kb"
+          ]
+        },
+        {
+          "url": "https://www.163.com/dy/article/KLDI016H0550ANUU.html",
+          "score": 7,
+          "domain": "www.163.com",
+          "root_domain": "163.com",
+          "reasons": [
+            "content_page",
+            "anchor_from_content_or_kb"
+          ]
+        },
+        {
+          "url": "https://www.news.cn/politics/20260210/bae8ee28f609424d8a46da678a5efebb/c.html",
+          "score": 7,
+          "domain": "www.news.cn",
+          "root_domain": "news.cn",
+          "reasons": [
+            "content_page",
+            "anchor_from_content_or_kb"
+          ]
+        }
+      ],
+      "evidence_pages": [
+        {
+          "url": "https://www.businessweekly.co.uk/news/academia-research/smartphones-get-smarter-essex-innovation",
+          "score": 2,
+          "domain": "www.businessweekly.co.uk",
+          "root_domain": "businessweekly.co.uk",
+          "reasons": [
+            "detail_article"
+          ]
+        },
+        {
+          "url": "https://inews.co.uk/news/technology/future-smartphones-prolong-battery-life-monitoring-behaviour-558689",
+          "score": 2,
+          "domain": "inews.co.uk",
+          "root_domain": "inews.co.uk",
+          "reasons": [
+            "detail_article"
+          ]
+        },
+        {
+          "url": "https://www.bloomberg.com/news/articles/2016-11-10/why-machine-learning-models-often-fail-to-learn-quicktake-q-a",
+          "score": 2,
+          "domain": "www.bloomberg.com",
+          "root_domain": "bloomberg.com",
+          "reasons": [
+            "detail_article"
+          ]
+        },
+        {
+          "url": "https://www.bbc.com/news/technology-41845878",
+          "score": 2,
+          "domain": "www.bbc.com",
+          "root_domain": "bbc.com",
+          "reasons": [
+            "detail_article"
+          ]
+        },
+        {
+          "url": "https://www.fnnews.com/news/202602101435067353",
+          "score": 2,
+          "domain": "www.fnnews.com",
+          "root_domain": "fnnews.com",
+          "reasons": [
+            "detail_article"
+          ]
+        },
+        {
+          "url": "http://www.bruneinews.net/news/278858714/avnet-insights-survey-apac-engineers-accelerate-ai-adoption-across-industries",
+          "score": 2,
+          "domain": "www.bruneinews.net",
+          "root_domain": "bruneinews.net",
+          "reasons": [
+            "detail_article"
+          ]
+        },
+        {
+          "url": "https://seekingalpha.com/news/4549255-us-plans-big-tech-chip-tariff-carve-outs-linked-to-tsmc-investment-ft-reports",
+          "score": 2,
+          "domain": "seekingalpha.com",
+          "root_domain": "seekingalpha.com",
+          "reasons": [
+            "detail_article"
+          ]
+        },
+        {
+          "url": "http://www.bruneinews.net/news/278858714",
+          "score": 2,
+          "domain": "www.bruneinews.net",
+          "root_domain": "bruneinews.net",
+          "reasons": [
+            "detail_article"
+          ]
+        },
+        {
+          "url": "https://arstechnica.com/information-technology/2023/09/ai-language-models-can-exceed-png-and-flac-in-lossless-compression-says-study",
+          "score": 2,
+          "domain": "arstechnica.com",
+          "root_domain": "arstechnica.com",
+          "reasons": [
+            "detail_article"
+          ]
+        },
+        {
+          "url": "https://techcrunch.com/2012/01/10/doctors-or-algorithms",
+          "score": 2,
+          "domain": "techcrunch.com",
+          "root_domain": "techcrunch.com",
+          "reasons": [
+            "detail_article"
+          ]
+        },
+        {
+          "url": "https://www.theverge.com/2019/4/10/18304558/ai-writing-academic-research-book-springer-nature-artificial-intelligence",
+          "score": 2,
+          "domain": "www.theverge.com",
+          "root_domain": "theverge.com",
+          "reasons": [
+            "detail_article"
+          ]
+        },
+        {
+          "url": "https://venturebeat.com/2016/09/17/why-the-a-i-euphoria-is-doomed-to-fail",
+          "score": 2,
+          "domain": "venturebeat.com",
+          "root_domain": "venturebeat.com",
+          "reasons": [
+            "detail_article"
+          ]
+        },
+        {
+          "url": "https://www.economist.com/the-economist-explains/2018/05/29/why-ubers-self-driving-car-killed-a-pedestrian",
+          "score": 2,
+          "domain": "www.economist.com",
+          "root_domain": "economist.com",
+          "reasons": [
+            "detail_article"
+          ]
+        },
+        {
+          "url": "https://www.statnews.com/2018/07/25/ibm-watson-recommended-unsafe-incorrect-treatments",
+          "score": 2,
+          "domain": "www.statnews.com",
+          "root_domain": "statnews.com",
+          "reasons": [
+            "detail_article"
+          ]
+        },
+        {
+          "url": "https://www.npr.org/2023/02/27/1159630243/how-microsofts-experiment-in-artificial-intelligence-tech-backfired",
+          "score": 2,
+          "domain": "www.npr.org",
+          "root_domain": "npr.org",
+          "reasons": [
+            "detail_article"
+          ]
+        },
+        {
+          "url": "https://www.theregister.com/2022/04/21/machine_learning_models_backdoors",
+          "score": 2,
+          "domain": "www.theregister.com",
+          "root_domain": "theregister.com",
+          "reasons": [
+            "detail_article"
+          ]
+        },
+        {
+          "url": "https://freedom-to-tinker.com/2016/08/24/language-necessarily-contains-human-biases-and-so-will-machines-trained-on-language-corpora",
+          "score": 2,
+          "domain": "freedom-to-tinker.com",
+          "root_domain": "freedom-to-tinker.com",
+          "reasons": [
+            "detail_article"
+          ]
+        },
+        {
+          "url": "https://www.theverge.com/2018/1/12/16882408/google-racist-gorillas-photo-recognition-algorithm-ai",
+          "score": 2,
+          "domain": "www.theverge.com",
+          "root_domain": "theverge.com",
+          "reasons": [
+            "detail_article"
+          ]
+        },
+        {
+          "url": "https://www.nytimes.com/2016/06/26/opinion/sunday/artificial-intelligences-white-guy-problem.html",
+          "score": 2,
+          "domain": "www.nytimes.com",
+          "root_domain": "nytimes.com",
+          "reasons": [
+            "detail_article"
+          ]
+        },
+        {
+          "url": "https://syncedreview.com/2021/05/27/deepmind-podracer-tpu-based-rl-frameworks-deliver-exceptional-performance-at-low-cost-28",
+          "score": 2,
+          "domain": "syncedreview.com",
+          "root_domain": "syncedreview.com",
+          "reasons": [
+            "detail_article"
+          ]
+        }
+      ]
+    }
+  ]
+}
